@@ -1,0 +1,2607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Catatan Keseharianku - Buku Harian Digital</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="JB.jpg">
+
+    <!-- Open Graph Meta Tags (untuk preview WhatsApp, Facebook, Discord, dll) -->
+    <meta property="og:title" content="Harudera - Buku Harian Digital Pribadi">
+    <meta property="og:description" content="Buku harian digital pribadi yang mencatat momen, pikiran, dan keseharian. Dari kesedihan hingga kesenangan, dalam keadaan apapun — aku akan mencatatnya semua. Selamat datang di dunia catatan keseharianku.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/itsukashiorii/NayaInokori/main/JB.jpg">
+    <meta property="og:image:secure_url" content="https://raw.githubusercontent.com/itsukashiorii/NayaInokori/main/JB.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="Harudera - Buku Harian Digital">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://naya-inokori.vercel.app/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Harudera">
+
+    <!-- Twitter Card (untuk Twitter/X) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Harudera - Buku Harian Digital Pribadi">
+    <meta name="twitter:description" content="Buku harian digital pribadi yang mencatat momen, pikiran, dan keseharian.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/itsukashiorii/NayaInokori/main/JB.jpg">
+
+    <style>
+/* 
+   UNTUK GANTI KE FONT TTF SENDIRI (cheeky-rabbit.ttf):
+
+   1. Download font dari: https://github.com/itsukashiorii/NayaInokori/raw/main/cheeky-rabbit.ttf
+   2. Letakkan file .ttf di folder yang sama dengan HTML
+   3. Ganti kode di bawah ini:
+
+   @font-face {
+       font-family: 'CheekyRabbit';
+       src: url('cheeky-rabbit.ttf') format('truetype');
+   }
+
+   4. Ganti font-family di body jadi: 'CheekyRabbit', sans-serif
+*/
+@font-face {
+            font-family: 'CheekyRabbit';
+            src: url('https://cdn.jsdelivr.net/gh/itsukashiorii/NayaInokori@main/cheeky-rabbit.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: "CheekyRabbit", "Hiragino Kaku Gothic ProN", "Meiryo", "MS PGothic", sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            line-height: 1.6;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            transition: max-width 0.3s ease;
+        }
+
+        @media (max-width: 800px) {
+            .container { 
+                max-width: 100%; 
+            }
+        }
+
+        .header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .header-left .icon { color: #888; }
+
+        .header-right {
+            font-size: 13px;
+            color: #0066cc;
+            cursor: pointer;
+            padding: 6px 12px;
+            border: 1px solid #0066cc;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .header-right:hover {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        .tabs-area {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            background: #fafafa;
+            position: relative;
+        }
+
+        .tabs { display: flex; flex: 1; }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-right: 1px solid #ddd;
+            transition: background 0.2s;
+        }
+
+        .tab:last-of-type { border-right: none; }
+
+        .tab.active {
+            background: #fff;
+            color: #333;
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+        }
+
+        .tab:hover { background: #f0f0f0; }
+
+        .random-image-btn {
+            position: relative;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-left: 1px solid #ddd;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            transition: background 0.3s;
+        }
+
+        .random-image-btn:hover { background: #f0f0f0; }
+
+        .random-image-btn img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            transition: transform 0.3s;
+        }
+
+        .random-image-btn:hover img {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .random-image-btn .floating-text {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            pointer-events: none;
+        }
+
+        .random-image-btn .floating-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+        }
+
+        .random-image-btn:hover .floating-text {
+            opacity: 1;
+            top: -40px;
+        }
+
+        .random-image-btn .btn-label {
+            font-size: 12px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .bookmark-btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 3px;
+            color: #555;
+            transition: all 0.3s;
+        }
+
+        .bookmark-btn:hover {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .bookmark-btn.saved {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .display-btn {
+            font-size: 13px;
+            color: #555;
+            border: 1px solid #ccc;
+            padding: 6px 12px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .display-btn:hover {
+            background: #e3f2fd;
+            border-color: #2196F3;
+            color: #1976D2;
+        }
+
+        .bookmark-notice {
+            padding: 8px 16px;
+            color: #c00;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+            display: none;
+        }
+
+        .bookmark-notice.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .warning-box {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            background: #fff8e1;
+        }
+
+        .warning-r15 {
+            color: #c00;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .warning-text {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .series-label {
+            text-align: center;
+            padding: 16px 16px 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .main-title {
+            text-align: center;
+            padding: 0 16px 16px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .author {
+            text-align: center;
+            padding-bottom: 12px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .author-name {
+            color: #0066cc;
+            cursor: pointer;
+        }
+
+        .last-update {
+            text-align: right;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+
+        .synopsis {
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .synopsis p { margin-bottom: 12px; }
+
+        .info-stars {
+            padding: 0 16px 16px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .info-stars a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .info-stars a:hover { text-decoration: underline; }
+
+        .tab-content {
+            display: none;
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content h3 {
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 8px;
+        }
+
+        .tab-content p {
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+
+        .thought-item, .review-item {
+            padding: 12px;
+            border-left: 3px solid #0066cc;
+            background: #f9f9f9;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .thought-item .date, .review-item .date {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        /* Ad Banner - Improved */
+@font-face {
+            font-family: 'CheekyRabbit';
+            src: url('https://cdn.jsdelivr.net/gh/itsukashiorii/NayaInokori@main/cheeky-rabbit.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+                .ad-banner {
+            margin: 16px;
+            padding: 16px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ad-banner:hover {
+            border-color: #4CAF50;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+        }
+
+        .ad-banner-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .ad-icon {
+            width: 60px;
+            height: 60px;
+            background: #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .ad-content {
+            text-align: left;
+            flex: 1;
+        }
+
+        .ad-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .ad-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .ad-btn {
+            background: #4CAF50;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .ad-banner:hover .ad-btn { background: #45a049; }
+
+        .chapter-nav {
+            padding: 16px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        .chapter-nav-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .chapter-nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        .chapter-nav-links a {
+            color: #0066cc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .chapter-nav-links a:hover { text-decoration: underline; }
+
+        .chapter-nav-links .separator { color: #ccc; }
+
+        .chapter-list { padding: 16px; }
+
+        .chapter-section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #333;
+            color: #333;
+        }
+
+        .chapter-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chapter-item:hover {
+            background: #f9f9f9;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .chapter-title {
+            color: #0066cc;
+            font-size: 15px;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .chapter-title:hover { text-decoration: underline; }
+
+        .chapter-meta {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .chapter-meta .revision {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .chapter-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .image-curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            overflow: hidden;
+            background: #0d0d1a;
+            transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .image-curtain img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            transform: scale(1.01);
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: gentlePulse 8s ease-in-out infinite;
+        }
+
+        .image-curtain:not(.open) img {
+            opacity: 0.45;
+            transform: scale(1);
+        }
+
+        .image-curtain.open img {
+            opacity: 0;
+            transform: scale(1.04);
+            animation: none;
+        }
+
+        .image-curtain.open {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.03); }
+        }
+
+        .image-curtain::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(13,13,26,0.4) 0%, rgba(13,13,26,0.7) 100%);
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        .image-curtain:not(.open)::after {
+            opacity: 1;
+        }
+
+        .image-curtain.open::after {
+            opacity: 0;
+        }
+
+        .curtain-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 18px;
+            font-weight: 300;
+            z-index: 1002;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+            text-align: center;
+            text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+            letter-spacing: 3px;
+            font-family: "CheekyRabbit", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+        }
+
+        .image-curtain:not(.open) .curtain-text {
+            opacity: 1;
+        }
+
+        .image-curtain.open .curtain-text {
+            opacity: 0;
+        }
+
+        .chapter-modal {
+            background: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            opacity: 1;
+            z-index: 1000;
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover { background: #f5f5f5; }
+
+        .modal-content {
+            padding: 24px 16px;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .modal-content h2 {
+            font-size: 22px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-content p {
+            margin-bottom: 16px;
+            text-align: justify;
+        }
+
+        .modal-nav {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .modal-nav button {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            color: #0066cc;
+            transition: background 0.3s;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .modal-nav button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .modal-nav button:hover:not(:disabled) { background: #f0f0f0; }
+
+        .footer {
+            padding: 24px 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        .display-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            min-width: 280px;
+        }
+
+        .display-panel.show {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .display-panel h3 {
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .display-option { margin-bottom: 12px; }
+
+        .display-option label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #555;
+        }
+
+        .display-option select, .display-option input[type="range"] {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1999;
+        }
+
+        .panel-overlay.show { display: block; }
+
+        .panel-close {
+            text-align: right;
+            margin-top: 12px;
+        }
+
+        .panel-close button {
+            padding: 6px 16px;
+            background: #0066cc;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           IMAGE GALLERY - SIMPLE GRID, KLIK MUNCUL TEKS
+           ============================================ */
+@font-face {
+            font-family: 'CheekyRabbit';
+            src: url('https://cdn.jsdelivr.net/gh/itsukashiorii/NayaInokori@main/cheeky-rabbit.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+                .gallery-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            overflow-y: auto;
+        }
+
+        .gallery-overlay.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .gallery-header {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            z-index: 10;
+        }
+
+        .gallery-title {
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .gallery-close-btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: #f5f5f5;
+            color: #333;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .gallery-close-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .gallery-controls {
+            padding: 12px 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .gallery-btn {
+            padding: 6px 14px;
+            border: 1px solid #ccc;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .gallery-btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        /* Grid gambar polos */
+@font-face {
+            font-family: 'CheekyRabbit';
+            src: url('https://cdn.jsdelivr.net/gh/itsukashiorii/NayaInokori@main/cheeky-rabbit.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+                .gallery-container {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            background: #fff;
+        }
+
+        .gallery-image-card {
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: #fff;
+        }
+
+        .gallery-image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .gallery-image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .gallery-image-card img[src] {
+            animation: none;
+            background: none;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Modal teks galeri */
+@font-face {
+            font-family: 'CheekyRabbit';
+            src: url('https://cdn.jsdelivr.net/gh/itsukashiorii/NayaInokori@main/cheeky-rabbit.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+                .gallery-text-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            padding: 24px;
+            z-index: 3100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: left;
+            border: 1px solid #eee;
+        }
+
+        .gallery-text-modal.show {
+            display: block;
+            animation: popIn 0.2s ease;
+        }
+
+        .gallery-text-modal h3 {
+            color: #0066cc;
+            margin-bottom: 12px;
+            font-size: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .gallery-text-modal p {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .gallery-text-modal .date {
+            font-size: 12px;
+            color: #888;
+            margin-top: 12px;
+            text-align: right;
+        }
+
+        .gallery-text-modal .close-text-btn {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .gallery-text-modal .close-text-btn:hover {
+            color: #333;
+        }
+
+        .text-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 3050;
+        }
+
+        .text-modal-overlay.show {
+            display: block;
+        }
+
+        /* ============================================
+           RESPONSIVE DESIGN - MOBILE FIRST
+           ============================================ */
+@font-face {
+            font-family: 'CheekyRabbit';
+            src: url('https://cdn.jsdelivr.net/gh/itsukashiorii/NayaInokori@main/cheeky-rabbit.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+                @media (max-width: 768px) {
+            .container { max-width: 100%; }
+            .header { padding: 10px 12px; }
+            .header-left { font-size: 13px; }
+            .header-right { font-size: 12px; padding: 5px 10px; }
+
+            .tabs-area { flex-wrap: wrap; }
+            .tabs { flex: 1 1 100%; order: 2; }
+            .tab { padding: 10px 6px; font-size: 12px; flex: 1; }
+            .random-image-btn { 
+                flex: 1 1 100%; 
+                justify-content: center; 
+                padding: 8px; 
+                border-left: none; 
+                border-top: 1px solid #ddd;
+                order: 1;
+            }
+            .random-image-btn .btn-label { font-size: 12px; }
+
+            .toolbar { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
+            .bookmark-btn, .display-btn { font-size: 12px; padding: 5px 10px; flex: 1; }
+
+            .main-title { font-size: 16px; padding: 0 12px 12px; }
+            .series-label { font-size: 13px; padding: 12px 12px 6px; }
+            .author { font-size: 13px; }
+            .last-update { font-size: 12px; padding: 6px 12px; }
+            .synopsis { padding: 12px; font-size: 13px; }
+            .info-stars { padding: 0 12px 12px; font-size: 12px; }
+
+            .ad-banner { margin: 12px; padding: 12px; }
+            .ad-banner-inner { flex-direction: column; text-align: center; gap: 10px; }
+            .ad-content { text-align: center; }
+            .ad-icon { width: 50px; height: 50px; font-size: 24px; }
+
+            .chapter-nav { padding: 12px; }
+            .chapter-nav-title { font-size: 13px; }
+            .chapter-nav-links { gap: 6px; font-size: 12px; }
+            .chapter-nav-links .separator { display: none; }
+            .chapter-nav-links a { padding: 4px 8px; background: #f0f0f0; border-radius: 4px; }
+
+            .chapter-list { padding: 12px; }
+            .chapter-section-title { font-size: 16px; }
+            .chapter-item { padding: 10px 0; }
+            .chapter-title { font-size: 14px; }
+
+            .modal-header { padding: 12px; }
+            .modal-title { font-size: 14px; }
+            .close-btn { padding: 6px 12px; font-size: 12px; }
+            .modal-content { padding: 16px 12px; font-size: 15px; }
+            .modal-content h2 { font-size: 18px; }
+            .modal-nav { padding: 12px; gap: 6px; }
+            .modal-nav button { font-size: 12px; padding: 6px 12px; flex: 1; }
+
+            .gallery-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 12px;
+            }
+            .gallery-image-card img { height: 140px; }
+            .gallery-header { padding: 10px 12px; }
+            .gallery-title { font-size: 15px; }
+            .gallery-controls { padding: 10px 12px; gap: 8px; }
+            .gallery-btn { font-size: 12px; padding: 5px 10px; }
+
+            .display-panel { min-width: 260px; width: 90%; padding: 16px; }
+            .display-panel h3 { font-size: 15px; }
+
+            .tab-content { padding: 12px; }
+            .tab-content h3 { font-size: 15px; }
+            .thought-item, .review-item { padding: 10px; }
+
+            .footer { padding: 16px 12px; font-size: 11px; }
+
+            .image-curtain img { object-position: center top; }
+            .curtain-text { font-size: 18px; }
+        }
+
+        @media (max-width: 360px) {
+            .tab { font-size: 11px; padding: 8px 4px; }
+            .main-title { font-size: 14px; }
+            .chapter-title { font-size: 13px; }
+            .modal-content { font-size: 14px; }
+            .gallery-container { grid-template-columns: 1fr; }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container { max-width: 100%; margin: 0 20px; }
+            .gallery-container { grid-template-columns: repeat(3, 1fr); }
+        }
+            .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+            .scroll-top-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scroll-top-btn.show {
+            opacity: 0.8;
+            transform: translateY(0);
+        }
+
+        .scroll-top-btn:hover {
+            opacity: 1;
+            background: #555;
+        }
+            .chapter-search {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        .chapter-search input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .chapter-search input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .chapter-search input::placeholder {
+            color: #aaa;
+        }
+
+        .chapter-hidden {
+            display: none !important;
+        }
+
+        .chapter-count {
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #888;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+        }
+            .reading-time {
+            display: inline-block;
+            font-size: 11px;
+            color: #888;
+            margin-left: 8px;
+        }
+
+        .chapter-item .reading-time {
+            margin-left: 0;
+            margin-top: 2px;
+        }
+            .container, body, .chapter-modal, .modal-content, .modal-header, .modal-nav {
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+            button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 2px solid #0066cc;
+            outline-offset: 2px;
+        }
+
+        .chapter-item:focus-within {
+            background: #f0f7ff;
+        }
+            .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { background: #2e3d32; }
+        .toast.error { background: #c62828; }
+        .toast.info { background: #1565c0; }
+    </style>
+<base target="_blank">
+<base target="_blank">
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+    <audio id="bgMusic" loop style="display:none;">
+    <source src="Grisaia.mp3" type="audio/mpeg">
+</audio>
+    <audio id="galleryClickSound" preload="auto" style="display:none;">
+    <!-- GANTI src DI BAWAH INI DENGAN FILE MP3 KLIK-MU -->
+    <source src="click.mp3" type="audio/mpeg">
+</audio>
+    <div class="reading-progress" id="readingProgress"></div>
+    <div class="container" id="mainPage">
+        <div class="header">
+            <div class="header-left">
+                <span class="icon" style="font-style:normal;font-size:16px;">=</span>
+                <span>Catatan Keseharianku</span>
+            </div>
+            <div class="header-right" onclick="scrollToBottom()"> Gulir ke bawah</div>
+        </div>
+
+        <div class="tabs-area">
+            <div class="tabs">
+                <button class="tab active" data-tab="info">Informasi</button>
+                <button class="tab" data-tab="thoughts">Pikiran</button>
+                <button class="tab" data-tab="reviews">Tinjauan</button>
+            </div>
+            <div class="random-image-btn" onclick="openGallery()">
+                <div class="floating-text">Lihat Galeri Gambar!</div>
+                <img id="randomImg" src="JB.jpg" alt="Thumbnail Galeri">
+                <span class="btn-label">Donate kan dulu rek :3</span>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">Tambahkan ke Favorit</button>
+            <button class="display-btn" onclick="openDisplayPanel()">Penyesuaian Tampilan</button>
+        </div>
+
+        <div class="bookmark-notice" id="bookmarkNotice" style="display:none;"></div>
+
+        <div class="tab-content active" id="tab-info">
+            <h3>Informasi Catatan</h3>
+            <p>Selamat datang di buku harian digital pribadiku! Ini adalah tempatku mencatat semua kejadian, pikiran, dan momen penting dalam keseharianku.</p>
+            <p>Setiap catatan merepresentasikan hari atau peristiwa yang ingin kuingat. Dari hal-hal kecil yang membuatku tersenyum, hingga momen besar yang mengubah hidupku.</p>
+            <p>Gunakan tombol navigasi di bawah untuk membaca catatan-catatanku. Setiap catatan memiliki tanggal dan waktu yang mencerminkan kapan kejadian itu terjadi atau kapan aku menulisnya.</p>
+            <p><strong>Total Catatan:</strong> <span id="totalNotes">12</span> entri<br>
+            <strong>Terakhir Diperbarui:</strong> 25/01/2026<br>
+            <strong>Kategori:</strong> Keseharian, Refleksi, Pengalaman</p>
+        </div>
+
+        <div class="tab-content" id="tab-thoughts">
+            <h3>Pikiran & Ide</h3>
+            <div class="thought-item">
+                <div class="date">25 Januari 2026 - 07:30</div>
+                <div>Pagi ini aku bangun dengan pikiran bahwa setiap hari adalah kesempatan baru. Aku harus lebih disiplin dalam mencatat hal-hal kecil yang sering terlupakan.</div>
+            </div>
+            <div class="thought-item">
+                <div class="date">20 Januari 2026 - 22:15</div>
+                <div>Kadang aku merasa dunia bergerak terlalu cepat. Mencatat semua ini membantuku melambat dan menghargai setiap momen.</div>
+            </div>
+            <div class="thought-item">
+                <div class="date">15 Januari 2026 - 14:00</div>
+                <div>Ide baru: mungkin aku harus menambahkan foto atau gambar di setiap catatan agar lebih berwarna.</div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-reviews">
+            <h3>Tinjauan & Refleksi</h3>
+            <div class="review-item">
+                <div class="date">Minggu Ini - 25/01/2026</div>
+                <div><strong>Minggu yang Produktif:</strong> Banyak hal baik terjadi. Aku berhasil menyelesaikan proyek yang ditunda dan mulai rutin baru.</div>
+            </div>
+            <div class="review-item">
+                <div class="date">Bulan Ini - Januari 2026</div>
+                <div><strong>Evaluasi Bulanan:</strong> Januari penuh dengan tantangan baru. Ada banyak pelajaran berharga yang aku dapatkan dari kegagalan-kegagalan kecil.</div>
+            </div>
+            <div class="review-item">
+                <div class="date">Tahun Ini - 2026</div>
+                <div><strong>Resolusi:</strong> Tahun ini aku ingin lebih konsisten dalam mencatat, lebih berani mencoba hal baru, dan tidak lupa bersyukur.</div>
+            </div>
+        </div>
+
+        <div class="series-label">Buku Harian Digital Pribadi</div>
+
+        <div class="main-title">
+            Catatan Keseharianku - Setiap Hari adalah Cerita
+        </div>
+
+        <div class="author">
+            Penulis: <span class="author-name">Diriku Sendiri</span>
+        </div>
+
+        <div class="last-update">
+            Tanggal publikasi catatan terakhir: 25/01/2026
+        </div>
+
+        <div class="synopsis">
+            <p>Ini adalah kumpulan catatan pribadiku—sebuah buku harian digital yang berisi momen-momen penting, pikiran liar, dan kejadian sehari-hari yang membentuk siapa aku.</p>
+            <p>Dari pagi yang cerah hingga malam yang tenang, setiap entri adalah potongan waktu yang telah kulewati. Ada tawa, ada air mata, ada kebingungan, dan ada pencerahan.</p>
+            <p>Beberapa catatan mungkin terlihat sepele, tapi bagiku itu berarti sesuatu. Karena hidup tidak selalu tentang momen besar, tapi juga tentang kumpulan momen-momen kecil yang sering terlupakan.</p>
+            <p>Selamat membaca, dan semoga catatanku bisa mengingatkanmu untuk juga menghargai kisah-kisah kecil dalam hidupmu sendiri.</p>
+        </div>
+
+        <div class="info-stars">
+            Total 12 catatan telah ditulis<br>
+            Periode mencakup Januari 2026<br>
+            Tersedia dalam format digital<br>
+            Dapat dibaca kapan saja ... <a href="#">&gt;&gt;Baca selengkapnya</a>
+        </div>
+
+        <div class="ad-banner" onclick="openWritingTips()">
+            <div class="ad-banner-inner">
+                <div class="ad-icon" style="font-size:24px;">(i)</div>
+                <div class="ad-content">
+                    <div class="ad-title">Tips Menulis: Mulai Catatan Harianmu</div>
+                    <div class="ad-desc">Menulis 5 menit sehari bisa mengubah cara pandangmu terhadap hidup. Klik untuk melihat tips lengkap!</div>
+                    <div class="ad-btn">Lihat Tips →</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <div class="chapter-nav-title">Menampilkan catatan 1-12</div>
+            <div class="chapter-nav-links">
+                <a onclick="goToStart()">&laquo; Kembali ke awal</a>
+                <span class="separator">|</span>
+                <a onclick="goToPrev()">&lsaquo; Sebelumnya</a>
+                <span class="separator">|</span>
+                <a onclick="goToNext()">ke selanjutnya &rsaquo;</a>
+                <span class="separator">|</span>
+                <a onclick="goToEnd()">Sampai akhir &raquo;</a>
+            </div>
+        </div>
+
+        <div class="chapter-search">
+            <input type="text" id="chapterSearch" placeholder="Cari judul catatan..." oninput="filterChapters(this.value)">
+        </div>
+        <div class="chapter-count" id="chapterCount">Menampilkan 12 dari 12 catatan</div>
+        <div class="chapter-list" id="chapterList">
+            <div class="chapter-section-title">Bab 1: Awal Tahun 2026</div>
+
+            <div class="chapter-item" onclick="openChapter(0)" tabindex="0" role="button" aria-label="Buka catatan: Prolog ~Memulai Kembali~">
+                <a class="chapter-title">Prolog ~Memulai Kembali~</a>
+                <div class="chapter-meta">02/01/2026 07:02 <span class="revision">(Direvisi 15/01/2026 20:23)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(1)" tabindex="0" role="button" aria-label="Buka catatan: Hari Pertama di Kantor Baru">
+                <a class="chapter-title">Hari Pertama di Kantor Baru</a>
+                <div class="chapter-meta">03/01/2026 07:31 <span class="revision">(Direvisi 15/01/2026 17:40)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(2)" tabindex="0" role="button" aria-label="Buka catatan: Ketemu Kucing Lucu di Jalan">
+                <a class="chapter-title">Ketemu Kucing Lucu di Jalan</a>
+                <div class="chapter-meta">05/01/2026 07:54 <span class="revision">(Direvisi 16/01/2026 20:10)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(3)" tabindex="0" role="button" aria-label="Buka catatan: Ujian Hidup yang Tak Terduga">
+                <a class="chapter-title">Ujian Hidup yang Tak Terduga</a>
+                <div class="chapter-meta">07/01/2026 09:04 <span class="revision">(Direvisi 15/01/2026 15:43)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(4)" tabindex="0" role="button" aria-label="Buka catatan: Refleksi Pagi yang Cerah">
+                <a class="chapter-title">Refleksi Pagi yang Cerah</a>
+                <div class="chapter-meta">10/01/2026 09:42 <span class="revision">(Direvisi 12/01/2026 19:26)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(5)" tabindex="0" role="button" aria-label="Buka catatan: Makan Malam Bersama Keluarga">
+                <a class="chapter-title">Makan Malam Bersama Keluarga</a>
+                <div class="chapter-meta">12/01/2026 10:18 <span class="revision">(Direvisi 15/01/2026 15:46)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(6)" tabindex="0" role="button" aria-label="Buka catatan: Menemukan Kafe Tersembunyi">
+                <a class="chapter-title">Menemukan Kafe Tersembunyi</a>
+                <div class="chapter-meta">14/01/2026 10:42 <span class="revision">(Direvisi 15/01/2026 15:48)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(7)" tabindex="0" role="button" aria-label="Buka catatan: Ikatan Persahabatan Lama">
+                <a class="chapter-title">Ikatan Persahabatan Lama</a>
+                <div class="chapter-meta">16/01/2026 11:22 <span class="revision">(Direvisi 15/01/2026 15:49)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(8)" tabindex="0" role="button" aria-label="Buka catatan: Pengukuran Progress Diri">
+                <a class="chapter-title">Pengukuran Progress Diri</a>
+                <div class="chapter-meta">18/01/2026 07:41 <span class="revision">(Direvisi 15/01/2026 15:52)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(9)" tabindex="0" role="button" aria-label="Buka catatan: Tes Bakat Baru yang Dicoba">
+                <a class="chapter-title">Tes Bakat Baru yang Dicoba</a>
+                <div class="chapter-meta">20/01/2026 07:24 <span class="revision">(Direvisi 15/01/2026 15:54)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(10)" tabindex="0" role="button" aria-label="Buka catatan: Selamat Atas Pencapaian Kecil!">
+                <a class="chapter-title">Selamat Atas Pencapaian Kecil!</a>
+                <div class="chapter-meta">22/01/2026 07:41 <span class="revision">(Direvisi 22/01/2026 08:16)</span></div>
+            </div>
+
+            <div class="chapter-item" onclick="openChapter(11)" tabindex="0" role="button" aria-label="Buka catatan: Sahabat Sejati di Saat Susah">
+                <a class="chapter-title">Sahabat Sejati di Saat Susah</a>
+                <div class="chapter-meta">25/01/2026 08:20 <span class="revision">(Direvisi 15/01/2026 15:56)</span></div>
+            </div>
+        </div>
+
+        <div class="footer" id="pageFooter">
+            +Perhatian+<br><br>
+            Catatan ini adalah fiksi dan kenyataan pribadi. Segala kesamaan dengan kejadian nyata adalah bagian dari kisahku.<br>
+            Hak cipta dilindungi oleh waktu dan ingatan.
+        </div>
+    </div>
+
+    <div class="panel-overlay" id="panelOverlay" onclick="closeDisplayPanel()"></div>
+    <div class="display-panel" id="displayPanel">
+        <h3>Penyesuaian Tampilan</h3>
+        <div class="display-option">
+            <label>🔤 Ukuran Font <span id="fontSizeVal" style="color:#0066cc;font-weight:bold;">15px</span></label>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                <span style="font-size:10px;color:#888;">A</span>
+                <input type="range" id="fontSizeRange" min="8" max="28" value="15" oninput="changeFontSize(this.value)" style="flex:1;">
+                <span style="font-size:18px;color:#888;">A</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                <button onclick="quickFontSize(10)" style="padding:3px 10px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;">Kecil</button>
+                <button onclick="quickFontSize(14)" style="padding:3px 10px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;">Normal</button>
+                <button onclick="quickFontSize(18)" style="padding:3px 10px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;">Besar</button>
+                <button onclick="quickFontSize(24)" style="padding:3px 10px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;">Sangat Besar</button>
+            </div>
+        </div>
+        <div class="display-option">
+            <label>🎨 Tema Warna</label>
+            <div class="theme-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px;">
+                <button onclick="changeTheme('default')" style="padding:8px;border:2px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s;">
+                    <div style="width:100%;height:20px;background:#fff;border:1px solid #ddd;border-radius:4px;margin-bottom:4px;"></div>
+                    Default
+                </button>
+                <button onclick="changeTheme('sepia')" style="padding:8px;border:2px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s;">
+                    <div style="width:100%;height:20px;background:#fdf6e3;border:1px solid #e0d5c1;border-radius:4px;margin-bottom:4px;"></div>
+                    Sepia
+                </button>
+                <button onclick="changeTheme('dark')" style="padding:8px;border:2px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s;">
+                    <div style="width:100%;height:20px;background:#1a1a2e;border:1px solid #333;border-radius:4px;margin-bottom:4px;"></div>
+                    Dark
+                </button>
+                <button onclick="changeTheme('blue')" style="padding:8px;border:2px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s;">
+                    <div style="width:100%;height:20px;background:#e3f2fd;border:1px solid #bbdefb;border-radius:4px;margin-bottom:4px;"></div>
+                    Blue
+                </button>
+            </div>
+        </div>
+        <div class="display-option">
+            <label>📏 Jarak Baris</label>
+            <select id="lineHeightSelect" onchange="changeLineHeight(this.value)" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:13px;">
+                <option value="1.2">Sangat Rapat</option>
+                <option value="1.4">Rapat</option>
+                <option value="1.6" selected>Normal</option>
+                <option value="1.8">Longgar</option>
+                <option value="2.0">Sangat Longgar</option>
+                <option value="2.4">Extra Longgar</option>
+            </select>
+        </div>
+        <div class="display-option">
+            <label>📐 Lebar Konten</label>
+            <select id="widthSelect" onchange="changeWidth(this.value)" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:13px;">
+                <option value="narrow">Sempit (Cocok HP)</option>
+                <option value="normal" selected>Normal</option>
+                <option value="wide">Lebar (Cocok Tablet/PC)</option>
+            </select>
+        </div>
+        <div class="panel-close" style="margin-top:16px;">
+            <button onclick="resetDisplay()" style="background:#f5f5f5;color:#555;border:1px solid #ccc;margin-right:8px;">Reset</button>
+            <button onclick="closeDisplayPanel()" style="background:#0066cc;color:#fff;border:none;">Tutup</button>
+        </div>
+    </div>
+
+    <div class="chapter-overlay" id="chapterOverlay">
+        <div class="image-curtain" id="imageCurtain">
+            <img src="A.png" alt="Opening" id="curtainImg">
+            <div class="curtain-text" id="curtainText">Membuka Catatan...</div>
+        </div>
+
+        <div class="chapter-modal" id="chapterModal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="modalTitle">Prolog ~Memulai Kembali~</div>
+                    <div style="font-size:11px;color:#888;margin-top:2px;" id="chapterMeta">Bab 1 dari 12</div>
+                </div>
+                <button class="close-btn" onclick="closeChapter()">Tutup ✕</button>
+            </div>
+            <div class="modal-content" id="modalContent">
+            </div>
+            <div class="modal-nav">
+                <button id="prevBtn" onclick="prevChapter()">&lsaquo; Sebelumnya</button>
+                <button onclick="closeChapter()">Daftar Catatan</button>
+                <button onclick="copyChapterText()">Salin Teks</button>
+                <button id="nextBtn" onclick="nextChapter()">Selanjutnya &rsaquo;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALERI: hanya gambar, teks muncul saat diklik -->
+    <div class="gallery-overlay" id="galleryOverlay">
+        <div class="gallery-header">
+            <div class="gallery-title">Galeri Momen Keseharianku</div>
+            <button class="gallery-close-btn" onclick="closeGallery()">Tutup ✕</button>
+        </div>
+        <div class="gallery-controls">
+            <!-- Tombol "Muat Gambar Baru" dihapus karena gambar diisi manual -->
+            <button class="gallery-btn secondary" onclick="downloadAllImages()">Unduh Semua</button>
+            <button class="gallery-btn secondary" onclick="shuffleGallery()">Acak Posisi</button>
+        </div>
+        <div class="gallery-container" id="galleryContainer">
+        </div>
+    </div>
+
+    <!-- Modal teks galeri -->
+    <div class="text-modal-overlay" id="textModalOverlay" onclick="closeTextModal()"></div>
+    <div class="gallery-text-modal" id="galleryTextModal">
+        <button class="close-text-btn" onclick="closeTextModal()">&times;</button>
+        <h3 id="modalTextTitle"></h3>
+        <p id="modalTextDesc"></p>
+        <div class="date" id="modalTextDate"></div>
+    </div>
+
+    <div class="panel-overlay" id="tipsOverlay" onclick="closeWritingTips()"></div>
+    <div class="display-panel" id="tipsPanel" style="max-width: 500px;">
+        <h3>Tips Menulis Catatan Harian</h3>
+        <div style="margin-bottom: 16px; line-height: 1.8; font-size: 14px;">
+            <p><strong>1. Mulai dari 5 Menit</strong><br>
+            Tidak perlu menulis panjang. 5 menit sehari sudah cukup untuk membangun kebiasaan.</p>
+            <p><strong>2. Jangan Khawatir tentang Grammar</strong><br>
+            Ini catatan pribadimu. Yang penting adalah ekspresi, bukan kesempurnaan.</p>
+            <p><strong>3. Tulis Apa Saja</strong><br>
+            Cuaca, makanan, perasaan, atau bahkan daftar tugas. Semua itu berharga.</p>
+            <p><strong>4. Gunakan Waktu yang Sama Setiap Hari</strong><br>
+            Pagi hari sebelum beraktivitas atau malam sebelum tidur. Konsistensi adalah kunci.</p>
+            <p><strong>5. Baca Kembali Secara Berkala</strong><br>
+            Melihat perkembangan dirimu dari waktu ke waktu adalah hadiah terindah dari menulis.</p>
+        </div>
+        <div class="panel-close">
+            <button onclick="closeWritingTips()">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        const chapters = [
+            {
+                title: "Prolog ~Memulai Kembali~",
+                content: `<h2>Prolog ~Memulai Kembali~</h2>
+                    <p>Tahun baru telah tiba, dan bersamanya datang kesempatan untuk memulai lembaran baru. Aku bangun pagi ini dengan tekad yang lebih kuat—bahwa tahun ini akan berbeda dari tahun-tahun sebelumnya.</p>
+                    <p>Resolusiku sederhana: jujur pada diri sendiri, lebih sering mencatat, dan tidak lagi menunda-nunda impian. Setiap hari adalah hadiah, dan aku tidak ingin menyia-nyiakannya lagi.</p>
+                    <p>Kamar masih terasa dingin karena AC yang ketinggalan menyala semalaman. Aku membuka jendela, dan sinar matahari Januari yang lembut menyambutku. Ada sesuatu yang magis tentang pagi pertama di awal tahun.</p>
+                    <p>"Ini adalah hari pertamaku yang sesungguhnya," bisikku pada diri sendiri. "Dan aku akan membuatnya berarti."</p>
+                    <p>Dengan secangkir kopi hangat di tangan, aku mulai menulis. Bukan untuk siapa-siapa, tapi untuk diriku sendiri di masa depan. Agar aku tidak melupakan perasaan ini, tekad ini, dan harapan ini.</p>
+                    <p>Semoga tahun ini penuh dengan cerita yang layak untuk diceritakan.</p>`
+            },
+            {
+                title: "Hari Pertama di Kantor Baru",
+                content: `<h2>Hari Pertama di Kantor Baru</h2>
+                    <p>Gugup. Itu satu kata yang menggambarkan perasaanku pagi ini. Setelah berbulan-bulan mencari, akhirnya aku mendapatkan pekerjaan baru di tempat yang kuinginkan.</p>
+                    <p>Kantornya tidak terlalu besar, tapi nyaman. Mejaku berada di dekat jendela, dan aku bisa melihat pepohonan hijau di luar. Bosku ramah, dan rekan-rekan sekerja tampak akrab satu sama lain.</p>
+                    <p>Di jam istirahat, aku sempat ragu untuk bergabung dengan mereka yang sedang makan siang bersama. Tapi seorang rekan yang bernama Rina menyapaku dengan senyum hangat. "Mari bergabung, jangan makan sendirian!"</p>
+                    <p>Obrolan kami ringan—tentang makanan favorit, lalu lintas pagi ini, dan rekomendasi tempat makan di sekitar kantor. Aku merasa lebih tenang.</p>
+                    <p>Pulang ke rumah dengan perasaan lega. Hari pertama memang selalu menantang, tapi aku berhasil melewatinya. Besok akan lebih baik, aku yakin.</p>`
+            },
+            {
+                title: "Ketemu Kucing Lucu di Jalan",
+                content: `<h2>Ketemu Kucing Lucu di Jalan</h2>
+                    <p>Hari ini aku memutuskan untuk pulang kantor dengan berjalan kaki. Cuaca cerah, dan angin sore terasa segar. Di tengah perjalanan, aku bertemu dengan seekor kucing oranye yang sedang duduk manis di trotoar.</p>
+                    <p>Kucing itu menatapku dengan mata bulatnya, seolah-olah mengajakku untuk berbicara. Aku berjongkok, dan dengan hati-hati mengulurkan tangan. Dia mendekat, lalu menggosokkan kepalanya pada jari-jariku.</p>
+                    <p>Aku tidak punya makanan kucing, tapi aku berjanji akan membawa sesuatu besok jika kita bertemu lagi. "Tunggu aku di sini ya, Meng," kataku sambil tersenyum.</p>
+                    <p>Sepanjang jalan pulang, aku tidak bisa berhenti tersenyum. Momen kecil seperti ini yang sering membuat hariku lebih berwarna. Aku berharap bisa bertemu kucing itu lagi besok.</p>`
+            },
+            {
+                title: "Ujian Hidup yang Tak Terduga",
+                content: `<h2>Ujian Hidup yang Tak Terduga</h2>
+                    <p>Tidak semua hari berjalan mulus. Hari ini aku menghadapi masalah yang tidak kuduga—laptopku tiba-tiba mati total di tengah deadline pekerjaan penting.</p>
+                    <p>Panik? Tentu saja. Tapi aku mencoba tenang. Aku ingat kata-kata seorang teman: "Masalah adalah ujian untuk melihat seberapa siap kita."</p>
+                    <p>Aku pergi ke bengkel terdekat, dan untungnya teknisinya bisa memperbaikinya dalam beberapa jam. Data-dataku selamat. Lega rasanya seperti baru saja lolos dari bencana besar.</p>
+                    <p>Pelajaran hari ini: selalu backup data, dan jangan terlalu panik ketika menghadapi masalah. Solusi selalu ada, kita hanya perlu mencarinya dengan kepala dingin.</p>`
+            },
+            {
+                title: "Refleksi Pagi yang Cerah",
+                content: `<h2>Refleksi Pagi yang Cerah</h2>
+                    <p>Aku bangun lebih pagi dari biasanya hari ini. Ada yang berbeda—mungkin karena aku tidur lebih awal semalam, atau mungkin karena tubuhku sudah terbiasa dengan rutin baru.</p>
+                    <p>Aku menyeduh teh hijau dan duduk di balkon. Kota belum sepenuhnya bangun. Suara burung-burung masih lebih dominan dari suara kendaraan. Saat-saat seperti ini jarang kurasakan.</p>
+                    <p>Aku mulai memikirkan tentang arah hidupku. Apakah aku sedang menuju ke tempat yang kuinginkan? Atau aku hanya terbawa arus? Pertanyaan-pertanyaan ini tidak punya jawaban pasti, tapi aku yakin sedang berusaha.</p>
+                    <p>Refleksi pagi ini memberiku energi untuk menghadapi sisa hari. Kadang kita butuh berhenti sejenak untuk melihat seberapa jauh kita telah melangkah.</p>`
+            },
+            {
+                title: "Makan Malam Bersama Keluarga",
+                content: `<h2>Makan Malam Bersama Keluarga</h2>
+                    <p>Ibu menelepon sore tadi, mengajakku makan malam bersama. Aku menyadari sudah lama sekali sejak terakhir kali aku duduk bersama keluarga untuk makan bersama tanpa tergesa-gesa.</p>
+                    <p>Meja makan dipenuhi dengan hidangan favoritku—sup ayam ibu, tumis kangkung, dan ikan goreng. Rasanya persis seperti masa kecilku. Tidak ada makanan di dunia yang bisa mengalahkan masakan ibu.</p>
+                    <p>Obrolan kami tentang banyak hal: pekerjaanku, kesehatan nenek, rencana liburan keluarga, dan gossip tetangga. Tertawa bersama mereka adalah obat terbaik setelah hari yang panjang.</p>
+                    <p>Sebelum pulang, ibu memberiku bekal makanan untuk besok. "Jangan terlalu sering makan di luar, tidak sehat," katanya. Aku mengangguk, merasa beruntung memiliki keluarga yang peduli.</p>`
+            },
+            {
+                title: "Menemukan Kafe Tersembunyi",
+                content: `<h2>Menemukan Kafe Tersembunyi</h2>
+                    <p>Aku menemukan tempat kecil yang menakjubkan hari ini. Sebuah kafe tersembunyi di gang sempit yang bahkan tidak muncul di Google Maps. Aku menemukannya secara tidak sengaja saat mencari jalan pintas.</p>
+                    <p>Interiornya minimalis dengan banyak tanaman hias. Baristanya adalah seorang pria paruh baya dengan senyum ramah. Aku memesan kopi susu, dan rasanya... luar biasa. Mungkin yang terbaik yang pernah kuminum.</p>
+                    <p>Aku duduk di sudut dekat jendela, membaca buku yang kubawa. Waktu berlalu begitu cepat. Dua jam terasa seperti dua puluh menit. Tempat ini punya aura yang membuatmu ingin tinggal lebih lama.</p>
+                    <p>Aku memutuskan akan menjadikan tempat ini sebagai spot rahasiaku. Tempat untuk melarikan diri sejenak dari hiruk-pikuk dunia. Kadang, yang terbaik ditemukan secara tidak sengaja.</p>`
+            },
+            {
+                title: "Ikatan Persahabatan Lama",
+                content: `<h2>Ikatan Persahabatan Lama</h2>
+                    <p>Hari ini aku bertemu dengan Andi, sahabatku dari masa SMA. Sudah hampir dua tahun sejak kami terakhir bertemu secara langsung. Kehidupan sibuk seringkali menjadi alasan untuk menunda pertemuan.</p>
+                    <p>Tapi begitu kami bertemu, rasanya seperti waktu tidak berlalu. Kami masih bisa tertawa lepas tentang kenangan lama, masih bisa saling mengerti tanpa banyak kata. Persahabatan sejati memang seperti itu, bukan?</p>
+                    <p>Kami makan di restoran favorit kami dulu, tempat yang sering kami datangi setelah sekolah. Banyak hal telah berubah—rambut Andi lebih panjang, aku lebih gemuk—tapi ikatan kami tetap sama kuatnya.</p>
+                    <p>Kami berjanji untuk tidak lagi menunggu dua tahun untuk bertemu lagi. "Minimal sebulan sekali," kata Andi. Aku setuju. Persahabatan butuh dirawat, seperti tanaman yang perlu disiram secara teratur.</p>`
+            },
+            {
+                title: "Pengukuran Progress Diri",
+                content: `<h2>Pengukuran Progress Diri</h2>
+                    <p>Akhir bulan sudah dekat, dan aku memutuskan untuk mengevaluasi progressku selama Januari ini. Apakah aku sudah cukup produktif? Apakah resolusiku terlaksana?</p>
+                    <p>Aku buat daftar kecil di buku catatanku. Beberapa target tercapai, beberapa masih dalam proses, dan beberapa... terpaksa aku akui belum kumulai sama sekali. Tapi itu bukan berarti gagal, hanya berarti perlu penyesuaian.</p>
+                    <p>Yang paling kubanggakan adalah rutinitas baru bangun pagi. Dulu aku selalu kesiangan, tapi sekarang aku bisa bangun jam 5:30 tanpa alarm. Tubuhku telah menyesuaikan diri dengan pola hidup baru.</p>
+                    <p>Yang perlu ditingkatkan: konsistensi olahraga dan membaca. Februari nanti aku akan lebih fokus pada dua hal itu. Evaluasi diri penting, asal jadi alat untuk memperbaiki diri, bukan untuk menyalahkan diri sendiri.</p>`
+            },
+            {
+                title: "Tes Bakat Baru yang Dicoba",
+                content: `<h2>Tes Bakat Baru yang Dicoba</h2>
+                    <p>Aku selalu penasaran dengan fotografi, tapi selalu merasa tidak punya bakat. Hari ini, aku meminjam kamera DSLR dari kakakku dan memutuskan untuk mencobanya.</p>
+                    <p>Aku berkeliling komplek perumahan, mencoba menangkap momen-momen sederhana: anak-anak bermain, bunga yang mekar, senja yang perlahan turun. Hasilnya? Tidak sempurna, tapi juga tidak seburuk yang kubayangkan.</p>
+                    <p>Yang mengejutkanku adalah betapa berbedanya melihat dunia melalui lensa kamera. Aku jadi lebih memperhatikan detail—cahaya, bayangan, warna. Dunia terlihat lebih indah ketika kau berusaha melihatnya dari sudut berbeda.</p>
+                    <p>Aku mungkin akan terus belajar fotografi. Bukan untuk menjadi profesional, tapi untuk melatihku melihat keindahan di hal-hal biasa. Kadang kita perlu mencoba hal baru untuk menemukan passion tersembunyi.</p>`
+            },
+            {
+                title: "Selamat Atas Pencapaian Kecil!",
+                content: `<h2>Selamat Atas Pencapaian Kecil!</h2>
+                    <p>Hari ini aku menyelesaikan proyek kecil yang sudah kugantung selama berminggu-minggu. Bukan proyek besar atau penting, tapi bagiku itu adalah kemenangan pribadi.</p>
+                    <p>Aku merayakannya dengan cara sederhana: membeli es krim rasa favoritku dan menonton film yang sudah lama ingin kulihat. Tidak perlu pesta besar untuk merayakan pencapaian. Yang penting adalah mengakui usaha kita sendiri.</p>
+                    <p>Kadang kita terlalu fokus pada target besar hingga lupa merayakan langkah-langkah kecil. Padahal setiap langkah kecil itu berarti. Setiap hari yang kita lewati dengan usaha adalah hari yang patut diapresiasi.</p>
+                    <p>Malam ini aku tidur dengan perasaan puas. Bukan karena aku sempurna, tapi karena aku berusaha. Dan itu sudah cukup.</p>`
+            },
+            {
+                title: "Sahabat Sejati di Saat Susah",
+                content: `<h2>Sahabat Sejati di Saat Susah</h2>
+                    <p>Hari ini adalah hari yang berat. Aku menghadapi masalah yang membuatku merasa down dan hampir menyerah. Tapi di saat itulah aku menyadari siapa sahabatku yang sebenarnya.</p>
+                    <p>Rina, rekan kerjaku yang baru kukenal sebulan ini, ternyata adalah orang pertama yang menyadari kalau aku tidak baik-baik saja. Dia tidak bertanya banyak, hanya duduk di sebelahku dan berkata, "Aku di sini kalau kau butuh cerita."</p>
+                    <p>Aku tidak langsung membuka diri, tapi kehadirannya membuatku merasa lebih baik. Kadang kita tidak butuh nasihat atau solusi. Kita hanya butuh seseorang yang hadir, yang mengatakan bahwa kita tidak sendirian.</p>
+                    <p>Malam ini aku mengirim pesan ke Rina, berterima kasih. Dia membalas dengan senyum dan kata-kata sederhana: "Sama-sama. Itu teman untuk."</p>
+                    <p>Aku tersenyum, merasa beruntung. Sahabat sejati bukan tentang berapa lama kau mengenal seseorang, tapi tentang bagaimana mereka hadir di saat kau membutuhkannya.</p>
+                    <p style="text-align:center; margin-top: 40px; font-style: italic; color: #888;">—Bab 1 Selesai—</p>`
+            }
+        ];
+
+        /* =========================================================
+   GANTI GAMBAR: Ubah 'image' di bawah dengan path file-mu.
+   Contoh: "img/foto1.jpg" atau "gambar/pagi.jpg"
+   Pastikan file gambar ada di folder yang sama/folder yang dituju.
+   ========================================================= */
+        const galleryData = [
+            {
+                title: "Pagi di Awal Tahun",
+                desc: "Sinar matahari Januari yang lembut menyambutku di pagi pertama tahun baru. Momen ini mengingatkanku bahwa setiap hari adalah kesempatan baru.",
+                date: "02 Januari 2026",
+                image: "P1.jpg"
+            },
+            {
+                title: "Kucing Oranye yang Ramah",
+                desc: "Bertemu dengan kucing oranye yang duduk manis di trotoar. Dia menggosokkan kepalanya pada jariku, seolah mengajakku berbicara.",
+                date: "05 Januari 2026",
+                image: "A.png"
+            },
+            {
+                title: "Makan Malam Keluarga",
+                desc: "Meja makan dipenuhi dengan hidangan favoritku—sup ayam ibu, tumis kangkung, dan ikan goreng. Tidak ada makanan yang bisa mengalahkan masakan ibu.",
+                date: "12 Januari 2026",
+                image: "JB.jpg"
+            },
+            {
+                title: "Kafe Tersembunyi",
+                desc: "Menemukan kafe kecil di gang sempit yang tidak muncul di Google Maps. Interior minimalis dengan banyak tanaman hias dan kopi susu terbaik.",
+                date: "14 Januari 2026",
+                image: "P2.jpg"
+            },
+            {
+                title: "Masukan apa",
+                desc: "Masukan teks",
+                date: "16 Januari 2026",
+                image: "JB.jpg"
+            },
+            {
+                title: "Eksplorasi Fotografi",
+                desc: "Mencoba fotografi untuk pertama kalinya dengan kamera DSLR kakakku. Melihat dunia melalui lensa membuatku lebih memperhatikan detail kecil.",
+                date: "20 Januari 2026",
+                image: "A.png"
+            },
+            {
+    title: "Pagi di Awal Tahun",
+    desc: "Sinar matahari Januari yang lembut menyambutku di pagi pertama tahun baru. Momen ini mengingatkanku bahwa setiap hari adalah kesempatan baru.",
+    date: "02 Januari 2026",
+    image: "P3.jpg"
+},
+{
+    title: "Kucing Oranye yang Ramah",
+    desc: "Bertemu dengan kucing oranye yang duduk manis di trotoar. Dia menggosokkan kepalanya pada jariku, seolah mengajakku berbicara.",
+    date: "05 Januari 2026",
+    image: "A.png"
+},
+{
+    title: "Makan Malam Keluarga",
+    desc: "Meja makan dipenuhi dengan hidangan favoritku.",
+    date: "12 Januari 2026",
+    image: "3.gif"
+},
+{
+    title: "Kafe Tersembunyi",
+    desc: "Menemukan kafe kecil di gang sempit yang tidak muncul di Google Maps.",
+    date: "14 Januari 2026",
+    image: "P4.jpg"
+},
+{
+    title: "Persahabatan yang Abadi",
+    desc: "Bertemu sahabat lama dan mengenang masa sekolah.",
+    date: "16 Januari 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Eksplorasi Fotografi",
+    desc: "Mencoba fotografi untuk pertama kalinya.",
+    date: "20 Januari 2026",
+    image: "A.png"
+},
+{
+    title: "Langit Senja",
+    desc: "Warna jingga memenuhi cakrawala saat matahari terbenam.",
+    date: "22 Januari 2026",
+    image: "1.gif"
+},
+{
+    title: "Hujan Pertama",
+    desc: "Aroma tanah basah memenuhi udara setelah hujan turun.",
+    date: "25 Januari 2026",
+    image: "9.jpeg"
+},
+{
+    title: "Perjalanan Kereta",
+    desc: "Melihat sawah hijau dari jendela kereta.",
+    date: "28 Januari 2026",
+    image: "5.gif"
+},
+{
+    title: "Taman Kota",
+    desc: "Bersantai di bawah pohon besar di taman.",
+    date: "31 Januari 2026",
+    image: "2.gif"
+},
+{
+    title: "Pagi Berkabut",
+    desc: "Kabut tipis menyelimuti jalanan.",
+    date: "03 Februari 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Jalan Panjang",
+    desc: "Menyusuri jalan yang belum pernah dilewati sebelumnya.",
+    date: "05 Februari 2026",
+    image: "8.jpg"
+},
+{
+    title: "Buku Baru",
+    desc: "Membeli novel yang sudah lama ingin dibaca.",
+    date: "08 Februari 2026",
+    image: "4.gif"
+},
+{
+    title: "Lampu Kota",
+    desc: "Gemerlap lampu malam terlihat indah dari kejauhan.",
+    date: "11 Februari 2026",
+    image: "10.jpeg"
+},
+{
+    title: "Sarapan Sederhana",
+    desc: "Secangkir teh hangat dan roti bakar.",
+    date: "13 Februari 2026",
+    image: "6.jpeg"
+},
+{
+    title: "Hari yang Tenang",
+    desc: "Tidak ada agenda khusus hari ini.",
+    date: "15 Februari 2026",
+    image: "A.png"
+},
+{
+    title: "Menatap Bintang",
+    desc: "Langit malam tampak sangat cerah.",
+    date: "18 Februari 2026",
+    image: "1.gif"
+},
+{
+    title: "Perpustakaan Lama",
+    desc: "Rak-rak penuh buku berdebu menyimpan banyak cerita.",
+    date: "20 Februari 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Musik Favorit",
+    desc: "Mendengarkan lagu lama yang membangkitkan kenangan.",
+    date: "22 Februari 2026",
+    image: "5.gif"
+},
+{
+    title: "Sore yang Damai",
+    desc: "Angin sejuk menemani sore hari.",
+    date: "25 Februari 2026",
+    image: "7.jpg"
+},
+{
+    title: "Jejak Langkah",
+    desc: "Melihat jejak kaki di pasir pantai.",
+    date: "27 Februari 2026",
+    image: "2.gif"
+},
+{
+    title: "Pantai Sunyi",
+    desc: "Ombak kecil menyapu bibir pantai.",
+    date: "02 Maret 2026",
+    image: "A.png"
+},
+{
+    title: "Mendung Pagi",
+    desc: "Awan gelap menggantung di langit.",
+    date: "04 Maret 2026",
+    image: "9.jpeg"
+},
+{
+    title: "Jembatan Tua",
+    desc: "Struktur besi tua yang masih kokoh.",
+    date: "06 Maret 2026",
+    image: "4.gif"
+},
+{
+    title: "Warung Favorit",
+    desc: "Makan siang di tempat langganan.",
+    date: "08 Maret 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Bersepeda Pagi",
+    desc: "Mengelilingi kompleks saat udara masih segar.",
+    date: "10 Maret 2026",
+    image: "3.gif"
+},
+{
+    title: "Jalan Berliku",
+    desc: "Perjalanan menuju daerah pegunungan.",
+    date: "12 Maret 2026",
+    image: "10.jpeg"
+},
+{
+    title: "Pohon Rindang",
+    desc: "Berteduh di bawah pohon besar.",
+    date: "15 Maret 2026",
+    image: "8.jpg"
+},
+{
+    title: "Kopi Hangat",
+    desc: "Menikmati kopi di pagi yang dingin.",
+    date: "18 Maret 2026",
+    image: "1.gif"
+},
+{
+    title: "Langkah Baru",
+    desc: "Mencoba hal yang belum pernah dilakukan sebelumnya.",
+    date: "20 Maret 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Pasar Tradisional",
+    desc: "Suasana ramai dengan berbagai pedagang.",
+    date: "22 Maret 2026",
+    image: "6.jpeg"
+},
+{
+    title: "Hening Malam",
+    desc: "Malam terasa sangat tenang.",
+    date: "25 Maret 2026",
+    image: "A.png"
+},
+{
+    title: "Bunga Mekar",
+    desc: "Bunga-bunga bermekaran setelah hujan.",
+    date: "27 Maret 2026",
+    image: "2.gif"
+},
+{
+    title: "Pelangi",
+    desc: "Pelangi muncul setelah hujan reda.",
+    date: "30 Maret 2026",
+    image: "5.gif"
+},
+{
+    title: "Gunung Jauh",
+    desc: "Puncak gunung terlihat dari kejauhan.",
+    date: "02 April 2026",
+    image: "7.jpg"
+},
+{
+    title: "Udara Segar",
+    desc: "Pagi hari terasa sangat menyegarkan.",
+    date: "05 April 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Langit Biru",
+    desc: "Tidak ada awan hari ini.",
+    date: "07 April 2026",
+    image: "4.gif"
+},
+{
+    title: "Kenangan Lama",
+    desc: "Menemukan foto lama di laci.",
+    date: "10 April 2026",
+    image: "9.jpeg"
+},
+{
+    title: "Jalan Kota",
+    desc: "Lalu lintas mulai padat menjelang sore.",
+    date: "13 April 2026",
+    image: "1.gif"
+},
+{
+    title: "Malam Berangin",
+    desc: "Angin bertiup cukup kencang malam ini.",
+    date: "15 April 2026",
+    image: "A.png"
+},
+{
+    title: "Toko Buku",
+    desc: "Menghabiskan waktu berjam-jam membaca sinopsis.",
+    date: "18 April 2026",
+    image: "10.jpeg"
+},
+{
+    title: "Hari Cerah",
+    desc: "Cuaca sangat mendukung aktivitas luar ruangan.",
+    date: "20 April 2026",
+    image: "8.jpg"
+},
+{
+    title: "Jalan Setapak",
+    desc: "Melewati jalan kecil di antara pepohonan.",
+    date: "22 April 2026",
+    image: "3.gif"
+},
+{
+    title: "Sungai Tenang",
+    desc: "Air sungai mengalir perlahan.",
+    date: "25 April 2026",
+    image: "JB.jpg"
+},
+{
+    title: "Awan Putih",
+    desc: "Awan bergerak perlahan di langit.",
+    date: "27 April 2026",
+    image: "6.jpeg"
+},
+{
+    title: "Pemandangan Indah",
+    desc: "Salah satu pemandangan terbaik yang pernah kulihat.",
+    date: "30 April 2026",
+    image: "2.gif"
+},
+{
+    title: "Akhir Bulan",
+    desc: "Menutup bulan dengan rasa syukur.",
+    date: "01 Mei 2026",
+    image: "5.gif"
+},
+{
+    title: "Catatan Baru",
+    desc: "Memulai halaman baru dalam buku harian.",
+    date: "03 Mei 2026",
+    image: "7.jpg"
+},
+{
+    title: "Hari Libur",
+    desc: "Menghabiskan waktu untuk beristirahat.",
+    date: "05 Mei 2026",
+    image: "A.png"
+},
+{
+    title: "Perjalanan Kecil",
+    desc: "Perjalanan singkat yang menyenangkan.",
+    date: "08 Mei 2026",
+    image: "9.jpeg"
+}
+        ];
+
+        let currentChapter = 0;
+        let bookmarked = false;
+        let currentGalleryData = [...galleryData];
+
+        function scrollToBottom() {
+            const footer = document.getElementById('pageFooter');
+            footer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById('tab-' + tabId).classList.add('active');
+            });
+        });
+
+        function toggleBookmark() {
+            const btn = document.getElementById('bookmarkBtn');
+            const music = document.getElementById('bgMusic');
+            bookmarked = !bookmarked;
+            if (bookmarked) {
+                btn.textContent = '⛘ Sudah di Favorit';
+                btn.classList.add('saved');
+                showToast('Berhasil ditambahkan ke favorit', 'success');
+                // Play music
+                if (music) {
+                    music.volume = 0.3;
+                    music.play().catch(() => {
+                        showToast('Musik tidak bisa diputar otomatis', 'info');
+                    });
+                }
+            } else {
+                btn.textContent = 'Tambahkan ke Favorit';
+                btn.classList.remove('saved');
+                showToast('Dihapus dari favorit', 'info');
+                // Pause music
+                if (music) {
+                    music.pause();
+                    music.currentTime = 0;
+                }
+            }
+        }
+
+        function openDisplayPanel() {
+            document.getElementById('panelOverlay').classList.add('show');
+            document.getElementById('displayPanel').classList.add('show');
+        }
+
+        function closeDisplayPanel() {
+            document.getElementById('panelOverlay').classList.remove('show');
+            document.getElementById('displayPanel').classList.remove('show');
+        }
+
+        function changeFontSize(size) {
+            document.body.style.fontSize = size + 'px';
+            document.getElementById('fontSizeRange').value = size;
+            document.getElementById('fontSizeVal').textContent = size + 'px';
+            localStorage.setItem('fontSize', size);
+        }
+
+        function quickFontSize(size) {
+            changeFontSize(size);
+        }
+
+        function changeTheme(theme) {
+            const body = document.body;
+            const container = document.querySelector('.container');
+            const selects = document.querySelectorAll('select');
+            const inputs = document.querySelectorAll('input');
+            const buttons = document.querySelectorAll('button');
+
+            if (theme === 'sepia') {
+                body.style.backgroundColor = '#f4ecd8';
+                container.style.backgroundColor = '#fdf6e3';
+                body.style.color = '#5b4636';
+                container.style.borderColor = '#e0d5c1';
+            } else if (theme === 'dark') {
+                body.style.backgroundColor = '#1a1a2e';
+                container.style.backgroundColor = '#16213e';
+                body.style.color = '#e0e0e0';
+                container.style.borderColor = '#0f3460';
+            } else if (theme === 'blue') {
+                body.style.backgroundColor = '#e3f2fd';
+                container.style.backgroundColor = '#fff';
+                body.style.color = '#1565c0';
+                container.style.borderColor = '#bbdefb';
+            } else {
+                body.style.backgroundColor = '#f7f7f7';
+                container.style.backgroundColor = '#fff';
+                body.style.color = '#333';
+                container.style.borderColor = '#ddd';
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function changeLineHeight(height) {
+            document.body.style.lineHeight = height;
+            localStorage.setItem('lineHeight', height);
+        }
+
+        function changeWidth(mode) {
+            const container = document.querySelector('.container');
+            if (mode === 'narrow') {
+                container.style.maxWidth = '480px';
+            } else if (mode === 'wide') {
+                container.style.maxWidth = '1000px';
+            } else {
+                container.style.maxWidth = '800px';
+            }
+            localStorage.setItem('widthMode', mode);
+        }
+
+        function resetDisplay() {
+            changeFontSize(15);
+            changeTheme('default');
+            changeLineHeight(1.6);
+            changeWidth('normal');
+            document.getElementById('fontSizeRange').value = 15;
+            document.getElementById('themeSelect').value = 'default';
+            document.getElementById('lineHeightSelect').value = '1.6';
+            document.getElementById('widthSelect').value = 'normal';
+            localStorage.clear();
+        }
+
+        // Load saved preferences
+                // Keyboard support for chapter items
+        document.querySelectorAll('.chapter-item').forEach((item, idx) => {
+            item.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openChapter(idx);
+                }
+            });
+        });
+
+        window.addEventListener('load', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const savedLineHeight = localStorage.getItem('lineHeight');
+            const savedWidth = localStorage.getItem('widthMode');
+            const savedFontSize = localStorage.getItem('fontSize');
+
+            if (savedTheme) changeTheme(savedTheme);
+            if (savedLineHeight) changeLineHeight(savedLineHeight);
+            if (savedWidth) changeWidth(savedWidth);
+            if (savedFontSize) changeFontSize(savedFontSize);
+
+            refreshRandomImage();
+        });
+
+        // Reading progress bar
+        function updateReadingProgress() {
+            const overlay = document.getElementById('chapterOverlay');
+            if (overlay.style.display !== 'block') {
+                document.getElementById('readingProgress').style.width = '0%';
+                return;
+            }
+
+            const scrollTop = overlay.scrollTop;
+            const scrollHeight = overlay.scrollHeight - overlay.clientHeight;
+            const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+            document.getElementById('readingProgress').style.width = progress + '%';
+
+            // Scroll to top button
+            const scrollBtn = document.getElementById('scrollTopBtn');
+            if (overlay.scrollTop > 300) {
+                scrollBtn.classList.add('show');
+            } else {
+                scrollBtn.classList.remove('show');
+            }
+        }
+
+        document.getElementById('chapterOverlay').addEventListener('scroll', updateReadingProgress, true);
+        
+        // Double tap edge to navigate chapters
+        let lastTap = 0;
+        document.getElementById('chapterOverlay').addEventListener('touchend', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                const x = e.changedTouches[0].clientX;
+                const width = window.innerWidth;
+                if (x < width * 0.25) { prevChapter(); }
+                else if (x > width * 0.75) { nextChapter(); }
+            }
+            lastTap = currentTime;
+        });
+        window.addEventListener('scroll', updateReadingProgress);
+
+        // Auto-save reading position
+        function saveReadingPosition() {
+            localStorage.setItem('lastChapter', currentChapter);
+            localStorage.setItem('lastScroll', window.scrollY);
+        }
+
+        function restoreReadingPosition() {
+            const lastChapter = localStorage.getItem('lastChapter');
+            if (lastChapter !== null && confirm('Lanjutkan membaca dari catatan terakhir?')) {
+                openChapter(parseInt(lastChapter));
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeChapter();
+                closeDisplayPanel();
+                closeGallery();
+                closeTextModal();
+                closeWritingTips();
+            }
+            if (document.getElementById('chapterOverlay').style.display === 'block') {
+                if (e.key === 'ArrowLeft' && currentChapter > 0) { prevChapter(); }
+                if (e.key === 'ArrowRight' && currentChapter < chapters.length - 1) { nextChapter(); }
+                if (e.key === 'Home') { window.scrollTo(0, 0); }
+                if (e.key === 'End') { window.scrollTo(0, document.body.scrollHeight); }
+            }
+        });
+
+        /* Gambar thumbnail header — ganti src di HTML kalau mau ubah */
+        function refreshRandomImage() {
+            // Gambar statis (img/gambar1.jpg), tidak random dari internet
+        }
+
+        function goToStart() {
+            document.getElementById('chapterList').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goToPrev() {
+            alert('Halaman sebelumnya (fitur pagination)');
+        }
+
+        function goToNext() {
+            alert('Halaman selanjutnya (fitur pagination)');
+        }
+
+        function goToEnd() {
+            const items = document.querySelectorAll('.chapter-item');
+            if (items.length > 0) {
+                items[items.length - 1].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function openChapter(index) {
+            currentChapter = index;
+            const chapter = chapters[index];
+            const overlay = document.getElementById('chapterOverlay');
+            const imageCurtain = document.getElementById('imageCurtain');
+            const curtainImg = document.getElementById('curtainImg');
+            const modalContent = document.getElementById('modalContent');
+            const modalTitle = document.getElementById('modalTitle');
+
+            // Show overlay if hidden
+            if (overlay.style.display !== 'block') {
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                window.scrollTo(0, 0);
+            }
+
+            // Reset curtain for animation
+            imageCurtain.classList.remove('open');
+            curtainImg.style.animation = 'none';
+            void curtainImg.offsetWidth;
+            curtainImg.style.animation = '';
+
+            // Swap content while curtain covers
+            modalTitle.textContent = chapter.title;
+            modalContent.innerHTML = chapter.content;
+            document.getElementById('chapterMeta').textContent = 'Bab ' + (index + 1) + ' dari ' + chapters.length;
+            updateNavButtons();
+            saveReadingPosition();
+            highlightCurrentChapter();
+
+            // Fade out curtain to reveal new content
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    imageCurtain.classList.add('open');
+                }, 600);
+            });
+        }
+
+        function closeChapter() {
+            const overlay = document.getElementById('chapterOverlay');
+            const imageCurtain = document.getElementById('imageCurtain');
+            const curtainImg = document.getElementById('curtainImg');
+
+            imageCurtain.classList.remove('open');
+            curtainImg.style.animation = 'none';
+            void curtainImg.offsetWidth;
+            curtainImg.style.animation = '';
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, 1800);
+        }
+
+        function prevChapter() {
+            if (currentChapter > 0) {
+                openChapter(currentChapter - 1);
+            }
+        }
+
+        function nextChapter() {
+            if (currentChapter < chapters.length - 1) {
+                openChapter(currentChapter + 1);
+            }
+        }
+
+        function updateNavButtons() {
+            document.getElementById('prevBtn').disabled = currentChapter === 0;
+            document.getElementById('nextBtn').disabled = currentChapter === chapters.length - 1;
+        }
+
+
+
+                // Keyboard support for chapter items
+        document.querySelectorAll('.chapter-item').forEach((item, idx) => {
+            item.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openChapter(idx);
+                }
+            });
+        });
+
+        window.addEventListener('load', function() {
+            refreshRandomImage();
+        });
+
+        // ============================================
+        // GALLERY CLICK SOUND (MP3 / Web Audio Fallback)
+        // ============================================
+        function playGalleryClick() {
+            const audio = document.getElementById('galleryClickSound');
+            // Coba putar MP3 jika file tersedia
+            if (audio && audio.getElementsByTagName('source')[0].src && 
+                audio.getElementsByTagName('source')[0].src !== window.location.href) {
+                audio.currentTime = 0;
+                audio.play().catch(() => {
+                    // Fallback ke Web Audio API kalau MP3 gagal/gak ada
+                    playClickBeep();
+                });
+            } else {
+                playClickBeep();
+            }
+        }
+
+        function playClickBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 1200;
+                osc.type = 'square';
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.08);
+            } catch(e) {}
+        }
+
+        // ============================================
+        // GALERI: GRID GAMBAR, TEKS MUNCUL SAAT KLIK
+        // ============================================
+        function openGallery() {
+            const overlay = document.getElementById('galleryOverlay');
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            renderGalleryGrid();
+        }
+
+        function closeGallery() {
+            const overlay = document.getElementById('galleryOverlay');
+            overlay.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            closeTextModal(); // tutup modal teks jika terbuka
+        }
+
+        function renderGalleryGrid() {
+            const container = document.getElementById('galleryContainer');
+            container.innerHTML = '';
+            currentGalleryData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'gallery-image-card';
+                const img = document.createElement('img');
+                // Untuk file lokal: langsung pakai path. Untuk URL web: tambah cache-buster.
+                if (item.image.startsWith('http')) {
+                    img.src = item.image + (item.image.includes('?') ? '&' : '?') + 't=' + Date.now();
+                } else {
+                    img.src = item.image;
+                }
+                img.alt = item.title;
+                img.loading = 'lazy';
+                img.onerror = function() {
+                    this.style.background = '#ddd';
+                    this.alt = 'Gambar tidak ditemukan: ' + item.image;
+                };
+                img.onclick = (function(data) {
+                    return function() { showTextModal(data); };
+                })(item);
+                card.appendChild(img);
+                container.appendChild(card);
+            });
+        }
+
+        function showTextModal(data) {
+            const modal = document.getElementById('galleryTextModal');
+            const overlay = document.getElementById('textModalOverlay');
+            document.getElementById('modalTextTitle').textContent = data.title;
+            document.getElementById('modalTextDesc').textContent = data.desc;
+            document.getElementById('modalTextDate').textContent = 'Tanggal: ' + data.date;
+            modal.classList.add('show');
+            overlay.classList.add('show');
+        }
+
+        function closeTextModal() {
+            const modal = document.getElementById('galleryTextModal');
+            const overlay = document.getElementById('textModalOverlay');
+            modal.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+
+        function refreshGallery() {
+            playGalleryClick();
+            currentGalleryData.forEach(item => {
+                item.image = item.image.split('?')[0] + '?random=' + Math.floor(Math.random() * 10000);
+            });
+            renderGalleryGrid();
+        }
+
+        function shuffleGallery() {
+            playGalleryClick();
+            for (let i = currentGalleryData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentGalleryData[i], currentGalleryData[j]] = [currentGalleryData[j], currentGalleryData[i]];
+            }
+            renderGalleryGrid();
+        }
+
+        function downloadAllImages() {
+            playGalleryClick();
+            alert('Fitur unduh semua gambar akan membuka setiap gambar di tab baru. Klik kanan dan simpan untuk mengunduh.');
+            currentGalleryData.forEach(item => {
+                window.open(item.image, '_blank');
+            });
+        }
+
+        // ============================================
+        // WRITING TIPS FUNCTIONS
+        // ============================================
+                function filterChapters(query) {
+            const items = document.querySelectorAll('.chapter-item');
+            const term = query.toLowerCase().trim();
+            let visible = 0;
+            items.forEach((item, idx) => {
+                const title = item.querySelector('.chapter-title').textContent.toLowerCase();
+                if (title.includes(term)) {
+                    item.classList.remove('chapter-hidden');
+                    visible++;
+                } else {
+                    item.classList.add('chapter-hidden');
+                }
+            });
+            document.getElementById('chapterCount').textContent = 
+                'Menampilkan ' + visible + ' dari ' + items.length + ' catatan';
+        }
+
+        // Highlight current chapter in list
+        function highlightCurrentChapter() {
+            document.querySelectorAll('.chapter-item').forEach((item, idx) => {
+                if (idx === currentChapter) {
+                    item.style.background = '#e3f2fd';
+                    item.style.borderLeft = '3px solid #0066cc';
+                } else {
+                    item.style.background = '';
+                    item.style.borderLeft = '';
+                }
+            });
+        }
+
+                function getReadingTime(text) {
+            const words = text.replace(/<[^>]+>/g, '').split(/\s+/).length;
+            const minutes = Math.ceil(words / 200);
+            return minutes + ' menit';
+        }
+
+                function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + (type || '');
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+                function copyChapterText() {
+            const text = document.getElementById('modalContent').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Teks berhasil disalin', 'success');
+            }).catch(() => {
+                showToast('Gagal menyalin teks', 'error');
+            });
+        }
+
+        function openWritingTips() {
+            document.getElementById('tipsOverlay').classList.add('show');
+            document.getElementById('tipsPanel').classList.add('show');
+        }
+
+        function closeWritingTips() {
+            document.getElementById('tipsOverlay').classList.remove('show');
+            document.getElementById('tipsPanel').classList.remove('show');
+        }
+    </script>
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="document.getElementById('chapterOverlay').scrollTo({top:0,behavior:'smooth'})" title="Ke Atas">^</button>
+<div class="toast-container" id="toastContainer"></div>
+</body>
+</html>
