@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>魔王学院 — Diagram Relasi Karakter & Sihir (Vol. 1-17 + Pendukung)</title>
+<style>
+  :root{
+    --bg:#0a0a10; --panel:#12121a; --line:#26263a; --txt:#eceaf2; --dim:#8b8ba3;
+    --academy:#e5484d; --union:#46a758; --hero:#f5b400; --evil:#8e4ec6;
+    --elder:#f76b15; --ancient:#3e98f0; --family:#e93d82; --god:#12a594;
+    --deep:#00bcd4; --silver:#9e9e9e; --abyss:#673ab7;
+    --support:#e879f9; --support2:#a78bfa; --support3:#fb923c;
+    --magic:#22d3ee; --magic2:#f0abfc;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+  body{color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;}
+
+  #topbar{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(13,13,20,.94);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 16px;z-index:50}
+  #topbar h1{font-size:16px;letter-spacing:.5px;white-space:nowrap}
+  #topbar h1 span{color:var(--academy)}
+  #search{background:#191926;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;width:220px;font-size:13px;outline:none}
+  #search:focus{border-color:var(--academy)}
+  #searchResults{position:fixed;top:56px;left:170px;background:#15151f;border:1px solid var(--line);border-radius:8px;
+    max-height:300px;overflow:auto;width:260px;display:none;z-index:60}
+  .sr-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #1d1d29;display:flex;gap:9px;align-items:center}
+  .sr-item:hover{background:#22222f}
+  .sr-item img,.sr-item .ph{width:30px;height:30px;border-radius:50%;object-fit:cover}
+  .sr-item small{color:var(--dim)}
+  .ctl{margin-left:auto;display:flex;gap:8px}
+  .btn{background:#191926;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 13px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:var(--academy);color:#fff}
+  #hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);color:var(--dim);font-size:12px;
+    background:rgba(13,13,20,.85);padding:6px 16px;border-radius:20px;border:1px solid var(--line);z-index:40;white-space:nowrap}
+
+  #viewport{
+    position:fixed;top:56px;left:0;right:0;bottom:0;overflow:hidden;cursor:grab;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    contain: strict;
+  }
+  #viewport.dragging{cursor:grabbing}
+  #world{position:absolute;top:0;left:0;width:9000px;height:7000px;transform-origin:0 0;
+    background:radial-gradient(ellipse at 50% 40%,#12101c 0%,#0a0a10 65%);
+    will-change: transform;
+  }
+
+  .gbox{position:absolute;border:1.5px solid;border-radius:6px;background:rgba(255,255,255,.012);contain: strict}
+  .gbox .gtitle{position:absolute;top:-26px;left:0;font-size:15px;font-weight:700;letter-spacing:2px;white-space:nowrap}
+
+  .node{position:absolute;text-align:center;cursor:pointer;z-index:2;touch-action:manipulation;
+    contain: layout style paint; will-change: transform;}
+  .node .frame{background:linear-gradient(180deg,#1b1b26,#101018);border:1.5px solid #30304a;border-radius:8px;
+    padding:8px 8px 6px;transition:transform .15s,border-color .15s,box-shadow .15s;backface-visibility:hidden}
+  .node:hover .frame{transform:translateY(-4px) scale(1.05);border-color:#fff}
+  .node img{width:100%;height:132px;object-fit:cover;object-position:top;border-radius:5px;display:block;background:#232336}
+  .node.big img{height:170px}
+  .node.magic .frame{background:linear-gradient(180deg,#0a1a24,#06121a);border-color:#0e7490}
+  .node.magic .nm{color:#22d3ee}
+  .node.magic .rl{color:#67e8f9}
+  .node .nm{font-size:12.5px;font-weight:700;margin-top:6px;line-height:1.25}
+  .node .rl{font-size:10.5px;color:var(--dim);margin-top:2px;line-height:1.25}
+  .node.hl .frame{border-color:#fff;box-shadow:0 0 24px rgba(255,255,255,.4)}
+  .node.dimmed{opacity:.22}
+  .node.selected .frame{border-color:#fff;box-shadow:0 0 0 2px #fff,0 0 28px rgba(255,255,255,.45)}
+  .node .noimg{display:flex;align-items:center;justify-content:center;color:#55556e;font-size:11px}
+
+  svg#edges{position:absolute;top:0;left:0;width:9000px;height:7000px;pointer-events:none;overflow:visible;z-index:1;
+    contain: strict;}
+  .edge{fill:none;stroke-width:2.4;opacity:.5;transition:opacity .2s}
+  .edge.hl{opacity:1;stroke-width:3.6}
+  .edge.dimmed{opacity:.06}
+
+  .elabel{position:absolute;transform:translate(-50%,-50%);font-size:11px;font-weight:700;
+    background:rgba(10,10,16,.92);border:1px solid rgba(255,255,255,.2);padding:2px 8px;border-radius:4px;
+    white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:3;color:#ffffff;
+    text-shadow:0 1px 2px #000;contain: layout style paint;}
+  .elabel.hl{opacity:1;border-color:#fff;}
+  .elabel.showall{opacity:.9;}
+
+  #infoPanel{
+    position: absolute; width: 300px;
+    background: rgba(18,18,26,.98); border: 1px solid #30304a; border-radius: 10px;
+    padding: 16px; z-index: 100; display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,.7);
+    contain: layout style paint;
+  }
+  #infoPanel.open{ display: block; }
+  #infoPanel .closeBtn{position: absolute; top: 8px; right: 10px; background: none; border: none; color: #8b8ba3; font-size: 18px; cursor: pointer; line-height: 1;}
+  #infoPanel .closeBtn:hover{ color: #fff; }
+  #infoPanel .ip-av{width: 100%; height: 150px; object-fit: cover; object-position: top; border-radius: 8px; border: 1px solid #26263a; margin-bottom: 10px; background: #232336;}
+  #infoPanel .ip-name{ font-size: 17px; font-weight: 800; line-height: 1.2; }
+  #infoPanel .ip-kanji{ color: #8b8ba3; font-size: 12px; margin: 2px 0 8px; }
+  #infoPanel .ip-tags{ margin-bottom: 10px; }
+  #infoPanel .ptag{display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin: 0 4px 4px 0; border: 1px solid;}
+  #infoPanel .ip-desc{font-size: 12.5px; line-height: 1.6; color: #d0cee0; max-height: 180px; overflow-y: auto; margin-bottom: 10px; padding-right: 4px;}
+  #infoPanel .ip-desc::-webkit-scrollbar{ width: 4px; }
+  #infoPanel .ip-desc::-webkit-scrollbar-thumb{ background: #30304a; border-radius: 2px; }
+  #infoPanel h4{font-size: 11px; letter-spacing: 1px; color: #8b8ba3; margin-bottom: 6px; text-transform: uppercase;}
+  #infoPanel .ip-rels{ max-height: 150px; overflow-y: auto; }
+  #infoPanel .ip-rels::-webkit-scrollbar{ width: 4px; }
+  #infoPanel .ip-rels::-webkit-scrollbar-thumb{ background: #30304a; border-radius: 2px; }
+  #infoPanel .rel{display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; font-size: 11.5px; transition: background .15s, border-color .15s;}
+  #infoPanel .rel:hover{ background: #1c1c28; border-color: #26263a; }
+  #infoPanel .rel img,#infoPanel .rel .ph{width: 26px; height: 26px; border-radius: 50%; object-fit: cover; object-position: top; flex-shrink: 0; border: 1px solid #26263a;}
+  #infoPanel .rel .rnm{ font-weight: 700; }
+  #infoPanel .rel .rlb{ color: #8b8ba3; font-size: 10px; }
+
+  #panelLine{position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 99; display: none; overflow:visible;}
+  #panelLine line{stroke: #fff; stroke-width: 1.5; stroke-dasharray: 4 3; opacity: .6;}
+
+  #legend { display: none !important; }
+
+  #loader{position:fixed;inset:0;background:#0a0a10;display:flex;align-items:center;justify-content:center;
+    z-index:999;color:#8b8ba3;font-size:14px;transition:opacity .3s;pointer-events:none}
+  #loader.hide{opacity:0}
+</style>
+</head>
+<body>
+
+<div id="loader">Memuat diagram...</div>
+
+<div id="topbar">
+  <h1>👑 <span>魔王学院</span> DIAGRAM RELASI + SIHIR (Vol. 1-17 + Pendukung)</h1>
+  <input id="search" placeholder="🔍 Cari karakter/sihir..." autocomplete="off">
+  <div id="searchResults"></div>
+  <div class="ctl">
+    <button class="btn" id="btnFit">⛶ Fit Layar</button>
+    <button class="btn" id="btnLabels">🏷️ Label</button>
+    <button class="btn" id="btnZoomIn">＋</button>
+    <button class="btn" id="btnZoomOut">－</button>
+    <button class="btn" id="btnReset">⟲ Reset</button>
+  </div>
+</div>
+
+<div id="viewport">
+  <div id="world">
+    <div id="infoPanel">
+      <button class="closeBtn" id="infoClose">✕</button>
+      <img class="ip-av" id="ipAv" alt="">
+      <div class="ip-name" id="ipName"></div>
+      <div class="ip-kanji" id="ipKanji"></div>
+      <div class="ip-tags" id="ipTags"></div>
+      <div class="ip-desc" id="ipDesc"></div>
+      <h4>Relasi / Jalur</h4>
+      <div class="ip-rels" id="ipRels"></div>
+    </div>
+    <svg id="panelLine">
+      <line x1="0" y1="0" x2="0" y2="0" />
+    </svg>
+  </div>
+</div>
+
+<div id="hint">🖱️ Seret untuk geser · Scroll untuk zoom · Hover untuk melihat jalur · Klik untuk detail</div>
+
+<script>
+/* =====================================================================
+   PANDUAN GAMBAR:
+   1. Letakkan file gambar di folder yang SAMA dengan file HTML ini.
+   2. Jika ingin pakai folder khusus (misal 'img'), ubah menjadi 'img/JB.jpg'
+===================================================================== */
+
+const GROUPS = {
+  academy:{name:'魔王学院デルゾゲード · Akademi Raja Iblis', color:'#e5484d'},
+  union:{name:'アノス・ファンユニオン · Fan Union', color:'#46a758'},
+  hero:{name:'勇者学院アルケラノイズカ · Akademi Pahlawan', color:'#f5b400'},
+  evil:{name:'四邪王族 · Empat Raja Jahat', color:'#8e4ec6'},
+  sub:{name:'四邪王族の配下たち · Bawahan', color:'#7a5aa8'},
+  elder:{name:'七魔皇老 · Tujuh Tua Raja Iblis', color:'#f76b15'},
+  ancient:{name:'二千年前の有力者たち · Pihak 2000 Thn Lalu', color:'#3e98f0'},
+  family:{name:'両親 · Keluarga Anos', color:'#e93d82'},
+  god:{name:'選定神 / 八神選定者 · Dewa Terpilih', color:'#12a594'},
+  deep:{name:'深層世界 · Dunia Dalam (Silver Sea)', color:'#00bcd4'},
+  silver:{name:'銀水聖海 · Laut Suci Perak', color:'#9e9e9e'},
+  abyss:{name:'深淵魔法 · Sihir Jurang', color:'#673ab7'},
+  setan:{name:'魔族 · Iblis Pendukung', color:'#e879f9'},
+  manusia:{name:'人間 · Manusia Pendukung', color:'#a78bfa'},
+  roh:{name:'精霊 · Roh Pendukung', color:'#fb923c'},
+  dewa:{name:'神々 · Dewa Pendukung', color:'#f472b6'},
+  penjaga:{name:'番神 · Penjaga', color:'#34d399'},
+  naga:{name:'竜 · Naga', color:'#facc15'},
+  laut:{name:'聖銀水海 · Laut Suci Perak (Pendukung)', color:'#94a3b8'},
+  magic:{name:'魔法 · Sihir & Asal-Usul', color:'#22d3ee'},
+  magic_origin:{name:'起源魔法 · Sihir Asal (Origin Magic)', color:'#06b6d4'},
+  magic_root:{name:'根源魔法 · Sihir Akar (Root Magic)', color:'#8b5cf6'},
+  magic_abyss:{name:'深淵魔法 · Sihir Jurang (Abyss Magic)', color:'#ec4899'},
+};
+
+const NODES = [
+ // === KELUARGA ===
+ {id:'gusta',g:'family',x:3200,y:700,img:'img/gusta.png',name:'Gusta',rl:'Ayah Anos',kanji:'グスタ',c1:'#831843',c2:'#e93d82',
+  desc:'Ayah angkat Anos, seorang pandai besi. Ia sangat bangga pada putranya dan tidak pernah meragukan identitas Anos sebagai Raja Iblis Tirani. Di volume 12, terungkap bahwa ia dan Izabella adalah reinkarnasi dari entitas kuno dari Dunia Bencana (Calamity World).'},
+ {id:'izabella',g:'family',x:3200,y:950,img:'img/izabella.png',name:'Izabella',rl:'Ibu Anos',kanji:'イザベラ',c1:'#831843',c2:'#e93d82',
+  desc:'Ibu angkat Anos, seorang manusia. Ia menerima Anos sepenuhnya. Di volume 12, terungkap bahwa jiwanya terhubung dengan Calamity World, yang menyebabkan penyakit misterius pada dirinya. Ia adalah reinkarnasi dari kakak perempuan Dominic.'},
+
+ // === AKADEMI RAJA IBLIS ===
+ {id:'anos',g:'academy',big:1,x:1600,y:750,img:'Anos.jpg',name:'Anos Voldigoad',rl:'Raja Iblis Tirani',kanji:'アノス・ヴォルディゴード',c1:'#7f1d1d',c2:'#e5484d',
+  desc:'Raja Iblis Tirani yang bereinkarnasi 2000 tahun kemudian. Ia adalah satu-satunya orang yang bisa menggunakan "Venuzdnor" dan "Egil Grone Angdroa". Di volume 15-17, ia mendapatkan kembali ingatan masa lalunya sebagai "Noah", sang Perampas Dua Hukum (Two-Law Usurper), dan terlibat dalam konflik antar-dunia di Silver Water Holy Sea.'},
+ {id:'anoshu',g:'academy',x:1950,y:750,img:'img/anoshu.png',name:'Anoshu Polticoal',rl:'Wujud Kanak-kanak',kanji:'アノシュ・ポルティコーロ',c1:'#7f1d1d',c2:'#e5484d',
+  desc:'Wujud kanak-kanak Anos. Ia adalah murid cerdas yang sering dianggap sebagai "adik" oleh teman-temannya.'},
+ {id:'misha',g:'academy',x:1350,y:1150,img:'img/Misha.png',name:'Misha Necron',rl:'Sang Kakak Kembar',kanji:'ミーシャ・ネクロン',c1:'#0c4a6e',c2:'#38bdf8',
+  desc:'Siswi Akademi Raja Iblis, kakak dari Sasha. Sebenarnya ia diciptakan dari "sisa" Sasha, namun Anos mengubah takdirnya. Ia adalah teman pertama Anos dan sangat setia. Di volume 14, ia menyusup ke Magic Bullet World bersama Sasha untuk menyelamatkan Dewi Pencipta sebelumnya.'},
+ {id:'sasha',g:'academy',x:1350,y:1450,img:'Sasha.jpg',name:'Sasha Necron',rl:'Sang Adik Kembar',kanji:'サーシャ・ネクロン',c1:'#4a044e',c2:'#c026d3',
+  desc:'Adik dari Misha, pengguna "Mata Iblis Penghancur". Ia awalnya memusuhi Misha, tetapi Anos menyelamatkan mereka. Ia memiliki perasaan romantis terhadap Anos dan menjadi salah satu sekutu terkuatnya. Di volume 9, ia mengalami perubahan setelah menerima "Bintang Pencipta" terakhir.'},
+ {id:'lay',g:'academy',x:1750,y:1150,img:'Lay.png',name:'Lay Glanzudlii',rl:'Sang Pahlawan Reinkarnasi',kanji:'レイ・グランズドリィ',c1:'#3f3f46',c2:'#a1a1aa',
+  desc:'Reinkarnasi Kanon, sang Pahlawan. Ia adalah "Pedang Suci" yang mampu menggunakan berbagai pedang. Ia adalah sahabat terdekat Anos dan menjalin hubungan romantis dengan Misa. Di volume 13, ia menerima warisan dari Raja Suci sebelumnya dan menjadi kunci dalam konflik Holy Sword World.'},
+ {id:'avos',g:'academy',x:2050,y:1150,img:'Misa.png',name:'Avos Dilhevia',
+  rl:'Wujud Palsu yang Lahir dari Legenda',kanji:'アヴォス・ディルヘヴィア',c1:'#7c2d12',c2:'#fb923c',
+  desc:'Raja Iblis Tirani fiktif yang lahir dari rumor dan legenda yang tersebar selama 2000 tahun. Ia sebenarnya adalah wujud lain dari Misa Iliorogue yang muncul ketika Misa dikendalikan oleh rumor dan tradisi. Setelah dibebaskan oleh Anos, Misa kembali menjadi dirinya sendiri. Nama "Avos Dilhevia" juga pernah dipakai Anos sebagai penyamaran di masa lalu.'},
+
+ {id:'misa',g:'academy',x:2450,y:1450,img:'Misa.png',name:'Misa Iliorogue',
+  rl:'Ketua Fan Union · Putri Reno & Shin',kanji:'ミサ・イリオローグ',c1:'#78350f',c2:'#fbbf24',
+  desc:'Ketua Fan Union, putri dari Reno (Roh Agung) dan Shin Reglia. Ia memiliki hubungan romantis dengan Lay Glanzudlii. Di volume 2, terungkap bahwa ia pernah dikendalikan oleh rumor dan tradisi sehingga memunculkan wujud "Avos Dilhevia", namun Anos membebaskannya dan ia kembali menjadi dirinya sendiri.'},
+
+ // === FAN UNION ===
+ {id:'ellen',g:'union',x:200,y:750,img:'img/ellen.png',name:'Ellen',rl:'Ketua Fan Union',kanji:'エレン',c1:'#14532d',c2:'#4ade80',
+  desc:'Pemimpin Fan Union. Ia sangat vokal dalam mendukung Anos. Di volume 14, ia berteman dengan Linfa Assis di Minstrel World.'},
+ {id:'jessica',g:'union',x:380,y:750,img:'img/jessica.png',name:'Jessica',rl:'Fan Union',kanji:'ジェシカ',c1:'#14532d',c2:'#4ade80',
+  desc:'Penyanyi berbakat yang mempopulerkan lagu tentang Anos.'},
+ {id:'maia',g:'union',x:560,y:750,img:'img/maia.png',name:'Maia',rl:'Fan Union',kanji:'マイア',c1:'#14532d',c2:'#4ade80',
+  desc:'Anggota praktis yang mahir meracik ramuan.'},
+ {id:'nono',g:'union',x:200,y:950,img:'img/nono.png',name:'Nono',rl:'Fan Union',kanji:'ノノ',c1:'#14532d',c2:'#4ade80',
+  desc:'Anggota pendiam namun setia.'},
+ {id:'xia',g:'union',x:380,y:950,img:'img/xia.png',name:'Xia',rl:'Fan Union',kanji:'シア',c1:'#14532d',c2:'#4ade80',
+  desc:'Spesialis informasi dan gosip akademi.'},
+ {id:'himuka',g:'union',x:560,y:950,img:'img/himuka.png',name:'Himuka',rl:'Fan Union',kanji:'ヒムカ',c1:'#14532d',c2:'#4ade80',
+  desc:'Ahli strategi kecil-kecilan.'},
+ {id:'carsa',g:'union',x:290,y:1150,img:'img/carsa.png',name:'Carsa',rl:'Fan Union',kanji:'カーサ',c1:'#14532d',c2:'#4ade80',
+  desc:'Anggota cerewet dan energik.'},
+ {id:'shelia',g:'union',x:470,y:1150,img:'img/shelia.png',name:'Shelia',rl:'Fan Union',kanji:'シェリア',c1:'#14532d',c2:'#4ade80',
+  desc:'Anggota termuda yang mengidolakan Misa dan Anos.'},
+
+ // === AKADEMI PAHLAWAN ===
+ {id:'zeshia',g:'hero',x:200,y:200,img:'Zeshia.png',name:'Zeshia Bianca',rl:'Klon Sumber',kanji:'ゼシア・ビアンカ',c1:'#713f12',c2:'#f5b400',
+  desc:'Klon sumber buatan Eleonore. Ia adalah individu unik yang dapat berbicara. Anos memberinya kebebasan, dan ia menjadi murid di Akademi Raja Iblis.'},
+ {id:'eleonore',g:'hero',x:380,y:200,img:'Eleonore.png',name:'Eleonore Bianca',rl:'Pencipta Klon',kanji:'エレオノール・ビアンカ',c1:'#713f12',c2:'#f5b400',
+  desc:'"Induk" dari 10.000 klon sumber. Ia memiliki kepribadian keibuan. Setelah dibebaskan Anos, ia menjadi guru di Akademi Raja Iblis dan sangat menyayangi Zeshia.'},
+ {id:'emilia',g:'hero',x:650,y:200,img:'img/emilia.png',name:'Emilia Ludowell',rl:'Guru Pahlawan',kanji:'エミリア・ルードウェル',c1:'#713f12',c2:'#f5b400',
+  desc:'Guru muda yang awalnya membenci Anos karena statusnya sebagai iblis campuran. Setelah dikalahkan dan dihidupkan kembali oleh Anos sebagai hibrida, ia perlahan berubah dan jatuh cinta pada Anoshu. Ia kemudian menjadi guru di Akademi Raja Iblis.'},
+ {id:'ledriano',g:'hero',x:800,y:200,img:'img/ledriano.png',name:'Ledriano Azeschen',rl:'Kapten Tim Pahlawan',kanji:'レドリアーノ・アゼスチェン',c1:'#713f12',c2:'#f5b400',
+  desc:'Kapten tim elit. Ia mengakui kekuatan Anos setelah turnamen dan menjadi sekutunya.'},
+ {id:'laos',g:'hero',x:950,y:200,img:'img/laos.png',name:'Laos Jilfor',rl:'Prajurit Pahlawan',kanji:'ラオス・ジルフォー',c1:'#713f12',c2:'#f5b400',
+  desc:'Petarung berapi-api yang cepat mengakui Anos.'},
+ {id:'heine',g:'hero',x:1100,y:200,img:'img/heine.png',name:'Heine Iorg',rl:'Penyihir Pahlawan',kanji:'ハイネ・イオルグ',c1:'#713f12',c2:'#f5b400',
+  desc:'Penyihir arogan yang tunduk pada Anos setelah dikalahkan.'},
+ {id:'zamira',g:'hero',x:1250,y:200,img:'img/zamira.png',name:'Zamira Engelo',rl:'Prajurit Pahlawan',kanji:'ザミラ・エンゲロ',c1:'#713f12',c2:'#f5b400',
+  desc:'Prajurit kuat yang setia pada teman-temannya.'},
+
+ // === EMPAT RAJA JAHAT ===
+ {id:'eldmed',g:'evil',big:1,x:2500,y:150,img:'img/Eldemide.png',name:'Eldmed Ditigeon',rl:'Raja Api',kanji:'エールドメード・ディティジョン',c1:'#3b0764',c2:'#8e4ec6',
+  desc:'Raja Iblis "Kedamaian", pemimpin Empat Raja Jahat. Ia adalah "Raja Api" dan pernah dikalahkan Anos. Ia kemudian menjadi wali kelas Anos, meskipun tubuhnya sempat dirasuki oleh Nousgalia.'},
+ {id:'ijes',g:'evil',x:2800,y:150,img:'img/ijes.png',name:'Ijes Nodon',rl:'Raja Iblis Kegelapan',kanji:'冥王イージェス・ノードン',c1:'#1e1b4b',c2:'#6366f1',
+  desc:'Anggota Empat Raja Jahat dari Zaman Mitos. Kekuatannya hanya di bawah Anos.'},
+ {id:'kaihilam',g:'evil',x:2500,y:400,img:'img/kaihilam.png',name:'Kaihilam Jiste',rl:'Raja Iblis Kutukan',kanji:'詛王カイヒラム・ジステ',c1:'#0f172a',c2:'#475569',
+  desc:'Anggota Empat Raja Jahat dengan kepribadian ganda, yaitu dirinya dan kekasihnya, Jiste.'},
+ {id:'gairilys',g:'evil',x:2800,y:400,img:'img/gairilys.png',name:'Gairilys Delro',rl:'Raja Iblis Pengasing',kanji:'縛碑王ギリシリス・デッロ',c1:'#134e4a',c2:'#0d9488',
+  desc:'Anggota Empat Raja Jahat yang bertarung bersama Anos selama Perang Besar.'},
+ 
+ // === BAWAHAN ===
+ {id:'jick',g:'sub',x:3150,y:150,img:'img/jick.png',name:'Jick Ozma',rl:'Bawahan Eldmed',kanji:'ジック・オズマ',c1:'#2e1065',c2:'#7c3aed',
+  desc:'Menerima "dua nama" dari Eldmed. Ia adalah bawahan setia.'},
+ {id:'grad',g:'sub',x:3350,y:150,img:'img/grad.png',name:'Grad Azrema',rl:'Bawahan Eldmed',kanji:'グラド・アズレマ',c1:'#2e1065',c2:'#7c3aed',
+  desc:'Bawahan yang loyal dan bertarung untuk tuannya.'},
+ {id:'rinka',g:'sub',x:3150,y:400,img:'img/rinka.png',name:'Rinka Seorunes',rl:'Bawahan Eldmed',kanji:'リンカ・セオルネス',c1:'#2e1065',c2:'#7c3aed',
+  desc:'Bawahan Eldmed yang bertugas dalam operasi penting.'},
+ {id:'zaburo',g:'sub',x:3350,y:400,img:'img/zaburo.png',name:'Zaburo Gaze',rl:'Bawahan Eldmed',kanji:'ザブロ・ゲーズ',c1:'#2e1065',c2:'#7c3aed',
+  desc:'Salah satu dari empat bawahan utama Eldmed yang setia.'},
+
+ // === 7 TUA RAJA IBLIS ===
+ {id:'aivis',g:'elder',x:200,y:1850,img:'img/aivis.png',name:'Aivis Necron',rl:'Tua Raja Iblis',kanji:'アイヴィス・ネクロン',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Diciptakan Anos dari darahnya sendiri. Awalnya menentang, kemudian tunduk. Ia adalah nenek moyang klan Necron.'},
+ {id:'melheis',g:'elder',x:380,y:1850,img:'img/melheis.png',name:'Melheis Boran',rl:'Tua Raja Iblis',kanji:'メルヘイス・ボラン',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Bijaksana, salah satu yang pertama mengakui Anos. Pendukung utama faksi Unitarian.'},
+ {id:'gaios',g:'elder',x:560,y:1850,img:'img/gaios.png',name:'Gaios Anzem',rl:'Tua Raja Iblis',kanji:'ガイオス・アンゼム',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Kuat secara fisik. Tunduk setelah dikalahkan Anos.'},
+ {id:'ydol',g:'elder',x:740,y:1850,img:'img/ydol.png',name:'Ydol Anzeo',rl:'Tua Raja Iblis',kanji:'イドル・アンゼオ',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Setia pada takhta Raja Iblis dan pendukung Anos.'},
+ {id:'medoin',g:'elder',x:200,y:2100,img:'img/medoin.png',name:'Medoin Garsa',rl:'Tua Raja Iblis',kanji:'メドイン・ガーサ',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Diciptakan Anos dari darahnya sendiri dan setia pada perjuangannya.'},
+ {id:'zoro',g:'elder',x:380,y:2100,img:'img/zoro.png',name:'Zoro Angart',rl:'Tua Raja Iblis',kanji:'ゾロ・アンガート',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Iblis kuat yang setia pada perdamaian di bawah Raja Iblis Tirani.'},
+ {id:'eldora',g:'elder',x:560,y:2100,img:'img/eldora.png',name:'Eldora Zaia',rl:'Tua Raja Iblis',kanji:'エルドラ・ザイア',c1:'#7c2d12',c2:'#f76b15',
+  desc:'Iblis kuat yang diciptakan Anos dari darahnya sendiri.'},
+
+ // === 2000 TAHUN LALU ===
+ {id:'militia',g:'ancient',x:1700,y:1850,img:'img/militia.png',name:'Militia',rl:'Dewi Pencipta',kanji:'創造神ミリティア',c1:'#0c4a6e',c2:'#3e98f0',
+  desc:'Dewi Pencipta dunia. Reinkarnasinya adalah Arcana. Ia bekerja sama dengan Kanon, Reno, dan Shin untuk perdamaian.'},
+ {id:'kanon',g:'ancient',x:1900,y:1850,img:'img/kanon.png',name:'Kanon',rl:'Sang Pahlawan',kanji:'勇者カノン',c1:'#854d0e',c2:'#eab308',
+  desc:'Pahlawan legendaris dengan 7 sumber jiwa. Sahabat sekaligus rival Anos. Reinkarnasinya adalah Lay Glanzudlii.'},
+ {id:'reno',g:'ancient',x:2100,y:1850,img:'Lina.png',name:'Reno',rl:'Roh Agung Besar',kanji:'大精霊レノ',c1:'#065f46',c2:'#34d399',
+  desc:'Roh Agung Besar pemimpin dunia roh. Ibu Misa, istri Shin. Ia mengorbankan dirinya demi masa depan dunia roh. Ia adalah salah satu dari tiga ibu terkuat dalam cerita.'},
+ {id:'shin',g:'ancient',x:2300,y:1850,img:'img/shin.png',name:'Shin Reglia',rl:'Pedang Setia',kanji:'シン・レグリア',c1:'#18181b',c2:'#71717a',
+  desc:'Pendekar pedang terkuat, "Lengan Kanan Raja Iblis". Suami Reno, ayah Misa. Dulu sempat menjadi pelayan Eldmed.'},
+
+ // === DEWA TERPILIH ===
+ {id:'arcana',g:'god',x:2800,y:1850,img:'img/arcana.png',name:'Arcana',rl:'Dewi Terpilih',kanji:'アルカナ',c1:'#134e4a',c2:'#12a594',
+  desc:'Reinkarnasi Dewi Pencipta Militia. Awalnya berkontrak dengan Ahid, lalu memilih Anos. Di volume 6, terungkap bahwa ia adalah "adik" Anos di masa lalu, dan Anos menjanjikan perlindungan padanya.'},
+ {id:'ahid',g:'god',x:3000,y:1850,img:'img/ahid.png',name:'Ahid Alovo Agartz',rl:'Pemilih Dewa',kanji:'アヒド・アロボ・アガーツェ',c1:'#052e16',c2:'#16a34a',
+  desc:'Pemimpin gerakan "Pemilihan Dewa". Ia adalah Cardinal dari Jiordal dan Oracle dari Delapan Terpilih. Ia menjadi lawan Anos.'},
+
+ // === KARAKTER VOLUME 6-17 ===
+ {id:'noah',g:'deep',big:1,x:3600,y:750,img:'img/noah.png',name:'Noah',rl:'Perampas Dua Hukum',kanji:'ノア',c1:'#1a237e',c2:'#00bcd4',
+  desc:'Identitas masa lalu Anos 17.000 tahun yang lalu. Ia adalah "Perampas Dua Hukum" yang mencapai Sihir Jurang (Abyss Magic) pertama kali. Ia berteman dengan Amur, namun hubungan mereka hancur. Ia memiliki enam kandidat Raja Iblis yang bersaing untuk menggantikannya.'},
+ {id:'amur',g:'deep',x:3900,y:750,img:'img/amur.png',name:'Amur Veewither',rl:'Raja Iblis Pertama',kanji:'アムル・ヴィーウィザー',c1:'#b71c1c',c2:'#ff5722',
+  desc:'Raja Iblis Pertama, "Tiran Kehancuran". Ia adalah salah satu dari enam kandidat "Raja Iblis Agung". Ia adalah teman lama Noah, namun hubungan mereka memburuk. Ia menguasai Sihir Jurang dan menjadi ancaman utama di volume 16-17.'},
+ {id:'zinia',g:'deep',x:4200,y:750,img:'img/zinia.png',name:'Zinia Shivaheld',rl:'Raja Iblis Agung',kanji:'ジニア・シーヴァヘルド',c1:'#004d40',c2:'#009688',
+  desc:'Raja Iblis Agung yang menguasai Dua Belas Dunia Dalam. Ia adalah penakluk sihir yang pertama kali mencapai Sihir Jurang dalam sejarah Laut Suci Perak. Ia sekarat dan meminta bantuan Anos untuk menghentikan "Pusaran Absolut".'},
+ {id:'eques',g:'god',x:3600,y:1100,img:'img/eques.png',name:'Eques',rl:'Dewa Peralatan / Ketua Dewa',kanji:'エクエス',c1:'#ff6f00',c2:'#ffc107',
+  desc:'Dewa Peralatan dan Ketua Dewa Dunia Militia. Ia lahir dari intrik Graham. Ia menganggap dirinya sebagai pusat alam semesta dan menjadi antagonis utama di volume 10-11. Ia memiliki kemampuan untuk memilih masa depan apa pun.'},
+ {id:'nousgalia',g:'god',x:3900,y:1100,img:'img/nousgalia.png',name:'Nousgalia',rl:'Dewa Agung Surgawi',kanji:'ノウスガリア',c1:'#4a148c',c2:'#9c27b0',
+  desc:'Dewa Agung Surgawi dan pilar para dewa. Ia memiliki kemampuan untuk mengendalikan semua energi magis. Ia merasuki tubuh Eldmed dan menjadi ancaman bagi Anos.'},
+ {id:'graham',g:'abyss',x:4200,y:1100,img:'img/graham.png',name:'Graham',rl:'Iblis Tanpa Kepala',kanji:'グラハム',c1:'#212121',c2:'#607d8b',
+  desc:'Iblis tanpa kepala yang sangat kuat hingga menentang tatanan para dewa. Ia juga dijuluki "Misfit" seperti Anos. Ia adalah antagonis utama di volume 8-9 dan memiliki kekuatan "Ketidakberadaan" (Nothingness).'},
+ {id:'vlad',g:'silver',x:3600,y:1450,img:'img/vlad.png',name:'Vlad',rl:'Kaisar Benar',kanji:'ヴラド',c1:'#3e2723',c2:'#795548',
+  desc:'Kaisar Benar yang menyamar sebagai Raja Suci Lebrahald. Ia adalah salah satu antagonis utama di volume 17. Pasukannya menyerang Militia World.'},
+ {id:'lebrahald',g:'silver',x:3900,y:1450,img:'img/lebrahald.png',name:'Lebrahald Heinriel',rl:'Raja Suci',kanji:'レブラハルド・ハインリエル',c1:'#1a237e',c2:'#3f51b5',
+  desc:'Raja Suci dari Holy Sword World Hayfolia. Ia adalah penguasa dunia yang terlibat dalam konflik antar-dunia. Ia memiliki pedang suci "Evansmana".'},
+ {id:'luna',g:'silver',x:4200,y:1450,img:'img/luna.png',name:'Luna Arzenon',rl:'Putri Jurang',kanji:'ルナ・アルゼノン',c1:'#4a0072',c2:'#8e24aa',
+  desc:'Putri Jurang dari Calamity World. Ia ingin memutuskan takdirnya untuk melahirkan "Singa Kehancuran". Ia meminta bantuan Lebrahald, namun pedang suci itu patah. Kisahnya terungkap di volume 13.'},
+
+ // =====================================================================
+ // === KARAKTER PENDUKUNG DARI GAKUIN.TXT ===
+ // =====================================================================
+ {id:'noilia',g:'setan',x:200,y:2800,img:'',name:'Noilia',rl:'Iblis (Turnamen Pedang)',kanji:'ノイリア',c1:'#86198f',c2:'#e879f9',
+  desc:'Noilia adalah lawan yang dikalahkan Anos Voldigoad secara instan di Turnamen Pedang Iblis.'},
+ {id:'glaze',g:'setan',x:380,y:2800,img:'',name:'Glaze',rl:'Guru Akademi Raja Iblis',kanji:'グレイズ',c1:'#86198f',c2:'#e879f9',
+  desc:'Glaze adalah seorang guru di Akademi Raja Iblis. Sebelum eksekusi yang dijadwalkan terhadap siswa berseragam putih, Glaze adalah salah satu dari dua guru yang diminta Melheis Boran untuk membantu memeriksa siswa yang datang terlambat karena khawatir mereka adalah bawahan Anos Voldigoad. Dia tidak muncul di anime.'},
+ {id:'leongryzel',g:'setan',x:560,y:2800,img:'',name:'Leon Gryzel',rl:'Iblis Midhaze',kanji:'レオン・グライゼル',c1:'#86198f',c2:'#e879f9',
+  desc:'Leon Gryzel adalah iblis yang tinggal di Midhaze. Ia digambarkan tampak agak lusuh dan memiliki wajah yang tidak dicukur, kemungkinan besar karena stres. Hal ini disebabkan oleh fakta bahwa putrinya yang masih kecil sakit dengan penyakit jantung, yang tidak dapat disembuhkan dengan sihir apa pun yang digunakan dokter, dan mereka menyatakan bahwa ia tidak akan bertahan hingga akhir tahun. Ia menghadiri Upacara Penobatan Kembali Raja Iblis dengan harapan bahwa Raja Iblis sejati Anos yang baru terungkap dapat menyelamatkan putrinya. Dia tidak muncul di anime.'},
+ {id:'boros',g:'setan',x:200,y:3050,img:'',name:'Boros',rl:'Raja Iblis Helzed',kanji:'ボロス',c1:'#86198f',c2:'#e879f9',
+  desc:'Boros adalah Raja Iblis Helzed. Dia adalah salah satu dari banyak iblis yang meminta audiensi dengan Raja Iblis Anos setelah Upacara Penahbisan Kembali Raja Iblis, karena adik perempuannya menderita penyakit langka yang tidak dapat disembuhkan.'},
+ {id:'liza',g:'setan',x:380,y:3050,img:'',name:'Liza',rl:'Adik Boros',kanji:'リーザ',c1:'#86198f',c2:'#e879f9',
+  desc:'Liza adalah adik perempuan Raja Iblis Boros. Dia menghadiri perjamuan untuk kunjungan Agatha dan berterima kasih kepada Anos karena telah menyelamatkan hidupnya. Ketika dia mengundang Anos ke kamarnya dengan meninggalkan kuncinya, Anos salah paham dan mengira Liza tidak puas dengan akomodasinya saat ini dan meminta Elio Ludwell untuk memindahkannya ke Delsgade.'},
+ {id:'kastilsage',g:'manusia',x:700,y:2800,img:'',name:'Sang Bijak Kastil',rl:'Penyihir Terbaik',kanji:'城の賢者',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'Sang bijak kastil adalah salah satu penyihir terbaik di negara asal Izabella dan Gusta. Namun, seperti semua orang di masa sekarang, sihir mereka lebih rendah dibandingkan dengan orang-orang dari Zaman Mitos, karena mereka tidak dapat menggunakan sihir penciptaan sederhana.'},
+ {id:'walimisha',g:'manusia',x:880,y:2800,img:'',name:'Wali Misha',rl:'Pelayan Misha',kanji:'ミーシャの世話役',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'Seorang pria berpenampilan tegap dengan janggut yang membesarkan Misha Necron. Mereka sangat dekat, karena ia dengan antusias menyemangati Misha pada hari ujian masuk. Dia manusia tetapi memiliki darah iblis di dalam dirinya. Sasha menyatakan bahwa waktu yang mereka habiskan bersama terbatas, seperti yang ia nyatakan: "[Misha], yang hanya ditemani oleh seorang pelayan jika benar-benar diperlukan—selalu sendirian." Dalam anime, Misha menyimpan surat darinya sebagai jimat keberuntungan. Ia disuarakan oleh Shō Okumura.'},
+ {id:'lilia',g:'manusia',x:700,y:3050,img:'',name:'Lilia',rl:'Istri Jerga',kanji:'リリア',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'Lilia adalah istri Jerga dan ibu dari putra mereka, Rigal. Mereka terbunuh dalam pertempuran oleh Raja Iblis Anos, yang mengingat mereka sebagai lawan yang tangguh. Dalam dunia mimpi yang kontradiktif, mereka bereinkarnasi sebagai seorang wanita bernama Matilda dan anak angkatnya, Sean. Anos membantu mereka mendapatkan kembali ingatannya untuk menghentikan Jerga memulai perang. Mereka tidak disebutkan namanya dalam novel, tetapi cerita pendek Blu-ray/DVD memberi mereka nama.'},
+ {id:'rigal',g:'manusia',x:880,y:3050,img:'',name:'Rigal',rl:'Putra Jerga',kanji:'リガル',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'Rigal adalah putra Jerga dan Lilia. Mereka terbunuh dalam pertempuran oleh Raja Iblis Anos. Dalam dunia mimpi yang kontradiktif, mereka bereinkarnasi sebagai seorang anak angkat bernama Sean.'},
+ {id:'putrilycius',g:'manusia',x:1060,y:2800,img:'',name:'Putri Lycius',rl:'Putri Raja Gairadite',kanji:'リシウスの娘',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'Putri Lycius adalah putri dari raja ke-106 Gairadite, Lycius Engelo Gairadite. Dia diberikan kepada Naga Kerajaan bersama dengan anggota keluarga kerajaan lainnya, tetapi Raja secara khusus mempertahankan kesadarannya di dalam naga untuk memeras Pahlawan Kanon agar menggunakan Evansmana untuk memisahkan mereka dan mengakhiri penderitaannya. Namun, terungkap bahwa dia memiliki delusi keselamatan yang sama seperti Lycius dan mencuri Evansmana untuk memperkuat Naga Kerajaan. Setelah mencuri Evansmana, dia mencoba membunuh Kanon untuk mengirimnya ke alam dewa, tetapi dihentikan oleh kekasihnya, Misa, yang marah atas pengkhianatan manusia yang terus-menerus terhadap kekasihnya. Putri Lycius mencoba melawan Misa untuk pergi ke alam dewa, tetapi Misa dengan santai menghancurkan sumber kekuatannya sebagai balasan. Dia muncul di Episode 17 (II). Ia disuarakan oleh Karin Oda. Anime tersebut menghilangkan adegan di mana dia mencoba membunuh Lay dan Misa membunuhnya sebagai balasan.'},
+ {id:'epiteo',g:'roh',x:1250,y:2800,img:'',name:'Epiteo',rl:'Ular Panjang',kanji:'長き蛇エピテオ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Ular Panjang Epiteo adalah roh yang lahir dari legenda ular terpanjang di dunia. Awalnya, ular ini cukup panjang untuk mengelilingi dunia sekali, tetapi seiring dengan semakin dibesar-besarkannya rumor tersebut, ular ini mampu melilit dunia sebanyak 333 kali. Karena panjangnya, Epiteo hanya dapat hidup di rawa ajaib di dalam lingkungan sekolah roh tersebut, meskipun kadang-kadang ia menjulurkan kepalanya ke Tujuh Lautan.'},
+ {id:'gawille',g:'roh',x:1430,y:2800,img:'',name:'Gawille',rl:'Anjing Peri',kanji:'妖精犬ガウイーレ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Gawille, si Anjing Peri, adalah roh anak yang sebagian rubah dan sebagian beruang yang hanya muncul di siang hari.'},
+ {id:'bavroana',g:'roh',x:1610,y:2800,img:'',name:'Bavroana',rl:'Pendekar Pedang',kanji:'矛盾剣士バブロアナ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Bavroana, Sang Pendekar Pedang yang Tidak Begitu Hebat, adalah pendekar pedang terkuat di antara para roh, yang menggunakan tombak dan perisai yang rusak. Ada sedikit rumor tentang Bavroana dan dia adalah peri langka yang jarang ditemui.'},
+ {id:'lilan',g:'roh',x:1250,y:3050,img:'',name:'Lilan',rl:'Peri Buku',kanji:'リーラン',c1:'#c2410c',c2:'#fb923c',
+  desc:'Lilan, atau peri buku, adalah roh yang mengambil bentuk buku hijau dengan anggota tubuh seperti tongkat. Terdapat 1.799 buku yang berisi informasi tentang roh-roh tersebut, meskipun tidak semuanya tercakup. Sebenarnya, terdapat 1.800 buku, dengan buku terakhir yang ditambahkan adalah bab tentang Roh Agung Avos Dilhevia, roh yang mewujudkan legenda Raja Iblis Tirani fiktif. Namun, informasi tentangnya disembunyikan hingga saat ini. Buku-buku tumbuh di pohon-pohon di dalam Hutan Buku yang luas. Ada juga versi putih dengan bulu yang terpasang di pungkasnya, yang berisi kuis alih-alih pengetahuan. Ini digunakan untuk menguji siswa. Setelah tiba di Hutan Buku, Anos Voldigoad menggunakan Ygg Neas untuk mengumpulkan semua 1.799 peri buku dan dengan cepat membacanya.'},
+ {id:'idoam',g:'roh',x:1430,y:3050,img:'',name:'Idoam',rl:'Roh Gunung Berapi',kanji:'火山精霊イドアム',c1:'#c2410c',c2:'#fb923c',
+  desc:'Kawah Idoam, Roh Gunung Berapi, digunakan untuk menghukum mereka yang kedapatan berbuat curang selama ujian sekolah roh.'},
+ {id:'jijake',g:'roh',x:1610,y:3050,img:'',name:'Jijake',rl:'Roh Berkaki Enam',kanji:'六本足の精霊ジジェイク',c1:'#c2410c',c2:'#fb923c',
+  desc:'Jijake, Roh Berkaki Enam, adalah roh berkaki enam. Jijake berarti "tanpa rumor" dalam bahasa roh kuno.'},
+ {id:'mayatlava',g:'roh',x:1790,y:3050,img:'',name:'Mayat Lava',rl:'Roh Disebutkan',kanji:'溶岩の死人',c1:'#c2410c',c2:'#fb923c',
+  desc:'Mayat Lava disebutkan dalam ujian sekolah roh. Pertanyaan yang melibatkan semangat ini juga bisa dijawab oleh Diedilich.'},
+ {id:'diedilich',g:'roh',x:1790,y:2800,img:'',name:'Diedilich',rl:'Roh Disebutkan',kanji:'デードイリッヒ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Diedilich disebutkan dalam ujian sekolah roh. Pertanyaan yang melibatkan roh ini juga dapat dijawab dengan Lava Corpse.'},
+ {id:'gisra',g:'roh',x:1250,y:3300,img:'',name:'Gisra',rl:'Roh Perahu',kanji:'ジスラ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Gisra adalah salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh ini juga berhubungan dengan penangkapan ikan.'},
+ {id:'met',g:'roh',x:1430,y:3300,img:'',name:'Met',rl:'Roh Perahu',kanji:'メト',c1:'#c2410c',c2:'#fb923c',
+  desc:'Met adalah salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh ini juga berhubungan dengan penangkapan ikan.'},
+ {id:'anoue',g:'roh',x:1610,y:3300,img:'',name:'Anoue',rl:'Roh Perahu',kanji:'アノウエ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Anoue adalah salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh ini juga berhubungan dengan penangkapan ikan.'},
+ {id:'veera',g:'roh',x:1790,y:3300,img:'',name:'Veera',rl:'Roh Perahu',kanji:'ビーラ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Veera adalah salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh ini juga berhubungan dengan penangkapan ikan.'},
+ {id:'guniel',g:'roh',x:1250,y:3550,img:'',name:'Tangga Guniel',rl:'Tangga Keberuntungan',kanji:'グニエールの階段',c1:'#c2410c',c2:'#fb923c',
+  desc:'Tangga Guniel, juga dikenal sebagai Tangga Keberuntungan, adalah roh yang merujuk pada dua puluh tangga, dan tantangan pertama dari uji coba roh. Sebagai ujian keberuntungan murni, hanya lima tangga yang akan mengarah ke atas sementara lima belas tangga lainnya akan mengarah kembali ke Ruang Uji Coba. Karena ejekan Grysilis, Anos menjadi waspada terhadap Tangga Guniel, karena mereka bisa sengaja membuatnya gagal jika mereka mau. Hal ini menyebabkan dia mengubah penampilan semua orang di timnya agar sesuai dengan penampilannya sendiri, sehingga menyulitkan tangga untuk memilihnya.'},
+ {id:'cenetello',g:'roh',x:1430,y:3550,img:'',name:'Cenetello',rl:'Kunang-kunang Penyembuh',kanji:'治癒蛍セネテロ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Cenetello, kunang-kunang penyembuh, adalah roh yang muncul sebagai kunang-kunang hijau yang dapat menyembuhkan luka roh lain. Mereka biasa disebut sebagai dokter roh.'},
+ {id:'ezyssey',g:'roh',x:1610,y:3550,img:'',name:'Ezyssey',rl:'Musim Semi Waktu',kanji:'時空の泉エゼッセイ',c1:'#c2410c',c2:'#fb923c',
+  desc:'Ezyssey, Musim Semi Waktu adalah roh yang memiliki kekuatan untuk melakukan perjalanan melalui ruang-waktu. Bentuknya berupa pegas semi transparan dengan aura ungu. Ketika Nosgalia menyerang Roh Agung Reno dan mempercepat pertumbuhan anaknya yang belum lahir, dia memohon agar seseorang menyelamatkan bayinya, menyebabkan bunga berbentuk tetesan air mata di taman bunga mekar dan melahirkan roh-roh baru. Ezyssey adalah yang terakhir lahir, tetapi Reno memohon agar ia membawa anaknya dua ribu tahun ke masa depan, di mana Raja Iblis pasti akan menyelamatkannya.'},
+ {id:'beheus',g:'dewa',x:2000,y:2800,img:'',name:'Beheus',rl:'Dewa Penusuk',kanji:'穿神ベヘウス',c1:'#be185d',c2:'#f472b6',
+  desc:'Beheus adalah Dewa Penusuk, yang mengendalikan ordo penusuk. Ia adalah dewa yang membuat perjanjian dengan ksatria Jiordal, Gazel Apt Ageila. Gazel menyalurkan kekuatan Beheus ke pedangnya untuk membentuk Tombak Ilahi Behetenos, yang digunakan Gazel melawan Anos Voldigoad. Beheus dihancurkan setelah Anos mengalahkan Gazel, setelah Anos menggunakan Mata Sihir Ungunya untuk menetralkan kekuatan ilahi Beheus dan menghancurkan sumbernya. Ordo Beheus kemudian dijarah dan diserap oleh Arcana atas perintah Ahid Alovo Agartz.'},
+ {id:'gaguna',g:'dewa',x:2180,y:2800,img:'',name:'Gaguna',rl:'Dewa Pedang Merah',kanji:'赤刃神ガグナ',c1:'#be185d',c2:'#f472b6',
+  desc:'Gaguna adalah Dewa Pedang Merah. Dewa yang dipanggil oleh Ricardo Arbitias ke dalam pedangnya, memungkinkan dia menembus sisik Naga Alfa.'},
+ {id:'enneteroton',g:'dewa',x:2360,y:2800,img:'',name:'Enneteroton',rl:'Dewa Parasitisme',kanji:'エンネテロトン',c1:'#be185d',c2:'#f472b6',
+  desc:'Enneteroton adalah Dewa Parasitisme, yang mengendalikan tatanan parasitisme. Ia adalah dewa yang membuat perjanjian dengan penguasa Gadeciola: Veaflare Wips Gadeciola. Ketika ia berhadapan dengan Anos, ia mencoba agar Enneteroton memparasit sumber Anos untuk memperbudaknya agar patuh kepadanya. Namun, karena kekebalan alami iblis terhadap parasit serta kekuatan sihir Anos yang jauh lebih unggul, ia mampu mengendalikan Enneteroton dan memerintahkannya untuk sebagian memparasit Viaflare sendiri, sementara bagian lainnya diperintahkan untuk meninggalkan Golroana. Dihadapkan dengan kemungkinan Anos mengambil alih seluruh koloni parasit, Viaflare terpaksa menyuruh Enneteroton bunuh diri, sehingga membebaskan semua orang untuk dikendalikannya.'},
+ {id:'austria',g:'dewa',x:2540,y:2800,img:'',name:'Ausravia',rl:'Dewa Duplikasi',kanji:'アウスラビア',c1:'#be185d',c2:'#f472b6',
+  desc:'Ausravia adalah Dewa Duplikasi, yang mengendalikan urutan duplikasi/replikasi. Ia adalah dewa perjanjian dari mantan pahlawan Kashim, yang menanamkan Ausravia dan urutan duplikasinya ke dalam Exneisis, Pedang Resonansi Suci, yang digunakan Kashim melawan Lay Grandsley. Ia menggunakan urutan Ausravia untuk menduplikasi perasaan yang ditanamkan ke dalam Exneisis, sehingga memungkinkannya untuk menggunakan Aske sendiri, serta menggunakannya untuk menduplikasi Exneisis sebagai sarana serangan.'},
+ {id:'garmrgund',g:'dewa',x:2000,y:3050,img:'',name:'Garmrgund',rl:'Dewa Pendekar Pedang',kanji:'ガルムグンド',c1:'#be185d',c2:'#f472b6',
+  desc:'Garmrgund adalah Dewa Pendekar Pedang. Mereka adalah pendekar pedang terampil yang mengenakan baju zirah biru pucat berbentuk pedang, dan memegang pedang ilahi transparan di tangan kanan mereka.'},
+ {id:'schnelde',g:'dewa',x:2180,y:3050,img:'',name:'Schnelde',rl:'Dewa Tombak',kanji:'シュネルデ',c1:'#be185d',c2:'#f472b6',
+  desc:'Schnelde adalah Dewa-Dewa Tombak. Mereka adalah prajurit tombak terampil yang mengenakan baju zirah pucat yang menyerupai tombak, dan mereka menggunakan tombak ilahi yang bercahaya.'},
+ {id:'amysius',g:'dewa',x:2360,y:3050,img:'',name:'Amysius',rl:'Dewa Pemanah',kanji:'アミシュウス',c1:'#be185d',c2:'#f472b6',
+  desc:'Amysius Dewa Pemanah. Pasukan kavaleri yang mengenakan baju zirah yang didesain seperti busur, dan mereka menggunakan busur ilahi raksasa.'},
+ {id:'dolzork',g:'dewa',x:2540,y:3050,img:'',name:'Dolzork',rl:'Dewa Penyihir',kanji:'ドルゾォーク',c1:'#be185d',c2:'#f472b6',
+  desc:'Dolzork adalah Dewa Penyihir. Mereka mengenakan baju zirah pucat berbentuk lingkaran sihir, dan memegang tongkat ilahi di masing-masing tangan. Mereka digambarkan sebagai penyihir yang terampil, mengkhususkan diri dalam mantra sihir seperti Jio Graze, dan juga memiliki kemampuan untuk mengubah mantra yang menyerang mereka menjadi batu. Terdapat banyak sekali dewa-dewa ini, karena mereka diciptakan untuk menjadi bagian dari Pasukan Dewa, yang tujuannya adalah untuk membawa perang ke dunia guna menebus hilangnya tatanan kehancuran setelah penyegelan Abernyu. Mereka menemani Dewa Perang Pelpedro untuk menyerang Raja Iblis Anos Voldigoad tetapi dipukul mundur olehnya dan rekan-rekannya.'},
+ {id:'rauzel',g:'dewa',x:2000,y:3300,img:'',name:'Rauzel',rl:'Dewa Mekar',kanji:'ラウゼル',c1:'#be185d',c2:'#f472b6',
+  desc:'Rauzel adalah Dewa Mekar yang mengatur semua hal yang mekar. Ia mengenakan pakaian petani dan tinggal di Kanopi Surgawi. Ia terluka parah oleh Romuen, Dewa Pemusnahan, dan kehilangan semua rekan-rekannya. Namun, Ennessone berhasil menyelamatkan hidupnya, sehingga ia membalas budi dengan menggunakan serbuk sari ilahinya untuk membawa Ennessone dan teman-temannya ke Laut Ibu.'},
+ {id:'voldovaizen',g:'dewa',x:2180,y:3300,img:'',name:'Voldovaizen',rl:'Dewa Api',kanji:'ヴォルドヴァイゼン',c1:'#be185d',c2:'#f472b6',
+  desc:'Voldovaizen adalah Dewa Api. Ordonya adalah Valdogotze, Meriam Pembakaran, yang memungkinkan penggunanya untuk meluncurkan tembakan meriam ilahi berupa api yang sangat besar. Ia sempat disebutkan oleh Gaetenaros, ketika ia menggunakan Seruling Ilahi Perubahan Ideedroend untuk menciptakan kembali ordonya selama duelnya melawan Diedrich Kreizen Agatha dan Naphta.'},
+ {id:'freuzaten',g:'dewa',x:2360,y:3300,img:'',name:'Freuzaten',rl:'Dewa Embun Beku',kanji:'フロイズアテネ',c1:'#be185d',c2:'#f472b6',
+  desc:'Freuzaten adalah Dewa Embun Beku. Ordo-nya adalah Annettathon, Awan Salju Embun Beku, yang menciptakan awan es yang meluncurkan rentetan hujan es yang membekukan apa pun yang disentuhnya. Dia sempat disebutkan oleh Gaetenaros, ketika dia menggunakan Seruling Ilahi Perubahan Ideedroend untuk menciptakan kembali ordonya selama duelnya melawan Diedrich Kreizen Agatha dan Naphta.'},
+ {id:'beztsum',g:'dewa',x:2540,y:3300,img:'',name:'Beztsum',rl:'Dewa Peluru Ajaib',kanji:'ベズツム',c1:'#be185d',c2:'#f472b6',
+  desc:'Beztsum adalah Dewa Peluru Ajaib, yang mendukung umat manusia selama Perang Besar. Ia digambarkan sebagai boneka lapis baja dengan meriam di kedua tangannya. Ketika Camus Anfas menyusup ke Azesion, Beztsum dengan mudah melihat penyamarannya dengan mata ilahinya dan mencoba menghentikannya. Namun, ia tidak mampu melawan Camus dan harus diselamatkan oleh satu peleton tentara manusia, yang diberi meriam di lengan kanan mereka oleh Beztsum. Sayangnya, mereka semua dikalahkan oleh Raja Iblis Anos, sementara sumber Beztsum nyaris lolos ke Alam Ilahi.'},
+ {id:'lyeno',g:'penjaga',x:2750,y:2800,img:'',name:'Lyeno Ga Roaz',rl:'Penjaga Mimpi',kanji:'リエノ・ガ・ロアズ',c1:'#047857',c2:'#34d399',
+  desc:'Lyeno Ga Roaz adalah Penjaga Mimpi. Penjaga yang perintahnya dikonsumsi oleh Arcana sebelum bertemu Anos. Dia menggunakannya untuk memulihkan ingatan Anos yang hilang melalui mimpinya.'},
+ {id:'reize',g:'penjaga',x:2930,y:2800,img:'',name:'Reize Na Ile',rl:'Penjaga Langit',kanji:'レーズ・ナ・イール',c1:'#047857',c2:'#34d399',
+  desc:'Reize Na Ile adalah Penjaga Langit. Dia memiliki penampilan seorang wanita bersayap dengan tubuh centaur. Dia adalah salah satu dari empat penjaga yang diciptakan oleh Eldmed Ditigeon untuk membuat perjanjian dengan Naya.'},
+ {id:'zeo',g:'penjaga',x:3110,y:2800,img:'',name:'Zeo La Opt',rl:'Penjaga Perlindungan',kanji:'ゼオ・ラ・オプト',c1:'#047857',c2:'#34d399',
+  desc:'Zeo La Opt adalah Penjaga Perlindungan. Dia memiliki penampilan seorang pria raksasa dengan perisai di punggungnya. Dia adalah salah satu dari empat penjaga yang diciptakan oleh Eldmed Ditigeon untuk membuat perjanjian dengan Naya.'},
+ {id:'atro',g:'penjaga',x:3290,y:2800,img:'',name:'Atro Ze Sistava',rl:'Penjaga Kematian',kanji:'アトロ・ゼ・シスターヴァ',c1:'#047857',c2:'#34d399',
+  desc:'Atro Ze Sistava adalah Penjaga Kematian. Bayangan hitam memegang selusin senjata, termasuk tombak, kapak, pedang, dan busur. Salah satu dari empat penjaga yang diciptakan oleh Eldmed Ditigeon untuk membuat perjanjian dengan Naya.'},
+ {id:'mirahi',g:'penjaga',x:2750,y:3050,img:'',name:'Mirahi Ide Jizm',rl:'Penjaga Suara',kanji:'ミラヒ・イデ・ジズム',c1:'#047857',c2:'#34d399',
+  desc:'Mirahi Ide Jizm adalah Penjaga Suara. Tiga puluh tiga penjaga pernah dipanggil bersama Azept oleh mantan paus Jiordal sementara Paus Gorloana menggunakan Egred untuk membangkitkan kembali paus yang jatuh selama pertempuran sucinya dengan Anos Voldigoad.'},
+ {id:'veneh',g:'penjaga',x:2930,y:3050,img:'',name:'Veneh Ze Raveil',rl:'Penjaga Pengakhiran',kanji:'ヴェネ・ゼ・ラヴェール',c1:'#047857',c2:'#34d399',
+  desc:'Veneh Ze Raveil adalah Penjaga Pengakhiran. Mereka adalah burung hitam raksasa dengan paruh raksasa dan cakar tajam. Meskipun mereka lemah jika dibandingkan dengan Penjaga Waktu dan Kehancuran, jumlah mereka lebih dari cukup untuk mengimbanginya. Dewi Pengakhiran Andeluc memanggil ratusan dari mereka untuk mencegah kelahiran Ennessone, namun mereka dikalahkan.'},
+ {id:'irina',g:'naga',x:3430,y:2800,img:'',name:'Irina Als Amina',rl:'Pemimpin Paduan Suara',kanji:'イリーナ・アルス・アミナ',c1:'#a16207',c2:'#facc15',
+  desc:'Irina Als Amina adalah pemimpin Paduan Suara Jiordal, yang mengundang Persatuan Penggemar Anos untuk ikut bernyanyi selama salah satu penampilan mereka. Ketika Ahid menculik Paduan Suara Mazmur, dia dengan rendah hati meminta Ellen dan yang lainnya untuk menggantikan posisi mereka. Dia disuarakan oleh Manaka Iwami.'},
+ {id:'delapanbijak',g:'naga',x:3580,y:2800,img:'',name:'Delapan Orang Bijak Lagu',rl:'Ahli Mazmur',kanji:'八歌賢人',c1:'#a16207',c2:'#facc15',
+  desc:'Delapan Orang Bijak Lagu adalah para ahli Jiorhaze tentang Mazmur Pengembara. Ketika penonton skeptis terhadap lagu Persatuan Penggemar Anos, "Himne Raja Iblis No. 6: Tetangga," para bijak memberikan penilaian jujur mereka dan ikut bernyanyi, menyebabkan semua orang ikut serta. Mereka masing-masing disuarakan oleh Kōji Marunaka, Kōsuke Kobayashi, Kenichi Mine, Yu Wakabayashi, Ryo Sugisaki, Kōichi Sōma, Shō Okumura, dan Masafumi Kobatake.'},
+ {id:'metis',g:'naga',x:3400,y:3050,img:'',name:'Metis',rl:'Kakak Gordo',kanji:'メティス',c1:'#a16207',c2:'#facc15',
+  desc:'Metis adalah kakak laki-laki Gordo, yang dikorbankan kepada Naga Kerajaan pada suatu waktu. Ketika Nate meratapi tugas yang akan menimpa dragonborn baru, untuk menjadi pilar yang menopang Dunia Bawah Tanah tanpa memiliki kesempatan untuk hidup, Gordo meyakinkannya bahwa saudaranya adalah inti naga, sehingga dragonborn baru akan mewarisi kepribadiannya dan memenuhi tugasnya tanpa masalah.'},
+ {id:'finn',g:'laut',x:3800,y:2800,img:'',name:'Finn',rl:'Pemburu Bangsawan',kanji:'フィン',c1:'#475569',c2:'#94a3b8',
+  desc:'Finn adalah seorang Pemburu Bangsawan dan salah satu bawahan Baltzarond. Ketika Anos meledakkan kapal mereka, Finn jatuh ke Hutan Misterius dan terluka parah. Anos menyelamatkannya untuk bernegosiasi dengan Baltzarond, tetapi mereka diserang oleh Perebut Dua Hukum, menyebabkan Anos menahannya agar Baltzarond dan anak buahnya dapat melarikan diri.'},
+ {id:'crouton',g:'laut',x:3980,y:2800,img:'',name:'Crouton Hornet',rl:'Korban Fitnah',kanji:'ホーネット・クルトン',c1:'#475569',c2:'#94a3b8',
+  desc:'Crouton Hornet adalah salah satu dari banyak orang yang marah atas hilangnya Evansmana dari Lebrahald Heinriel dan kebungkimannya mengenai masalah tersebut. Ketika bawahan Lebrahard dibunuh, Hornet dijebak atas kejahatan tersebut dan dikirim ke penjara, di mana ia akhirnya meninggal. Namun, ia berhasil meninggalkan Surat Wasiat Suci yang mengungkap pelaku sebenarnya, yang akhirnya ditemukan oleh Eleonore Bianca.'},
+ {id:'carzen',g:'laut',x:3800,y:3050,img:'',name:'Carzen Elminac',rl:'Master Kastil Perak',kanji:'カルゼン・エルミナク',c1:'#475569',c2:'#94a3b8',
+  desc:'Carzen Elminac adalah Master Kastil Perak, dan seorang penguasa pembantu tepercaya sebelum Kaltinas Ilbena, yang membangun kastil untuknya. Pada akhirnya, ia tampaknya pensiun karena usia tuanya, tetapi sebenarnya, ia dan rekan-rekan tukang kayu kastilnya menyadari bahwa mereka ingin menciptakan kastil yang indah yang bukan merupakan senjata perang, sehingga kehilangan gairah mereka untuk berkarya. Mereka semua berencana untuk menjalani sisa hidup mereka dengan tenang di sebuah desa terpencil, sampai mereka bertemu Farris Noin, yang telah bereinkarnasi dan tersesat di Balandias. Farris mengajari mereka tekniknya dan dengan itu, berhasil membangkitkan kembali gairah mereka untuk membangun kastil. Mereka terus bekerja hingga berhasil membangun lima kastil besar, dan akhirnya mereka semua meninggal dengan senyum di wajah mereka. Memutuskan untuk menghormati pekerjaan mereka, Farris menyegel kastil-kastil itu di dalam bingkai lukisan, agar keindahannya dapat dikagumi dan untuk mencegah siapa pun menyalahgunakannya hingga hari perang Balandias dengan dunia luar berakhir dan perdamaian akhirnya tiba. Namun, Tentara Tigrisfort datang ke desa dan mencuri kelima bingkai beserta kastil-kastil di dalamnya, dengan harapan dapat menggunakannya. Farris memohon kepada Raja yang Tak Tergoyahkan, mengatakan bahwa ia akan menciptakan kastil yang lebih baik daripada yang dicurinya agar kelima kastil ini tetap berada di dalam bingkainya, dan ia menciptakan kembali mahakaryanya, Zeridheavens, untuk digunakan oleh Raja yang Tak Tergoyahkan.'},
+ {id:'warzerk',g:'laut',x:3980,y:3050,img:'',name:'Warzerk',rl:'Dewa Penghancuran',kanji:'ウォーザーク',c1:'#475569',c2:'#94a3b8',
+  desc:'Warzerk adalah Dewa Penghancuran dunia Elenesia Ketujuh. Imam Besar Belmas Fazat mendemonstrasikan mantranya untuk memperkuat Ketertiban dengan memuji Warzerk, meningkatkan daya hancur Elenesia Ketujuh di area tertentu.'},
+
+ // =====================================================================
+ // === SIHIR (MAGIC) — Dipisahkan sebagai node tersendiri ===
+ // =====================================================================
+
+ // --- ORIGIN MAGIC (起源魔法) ---
+ {id:'venuzdonoa',g:'magic_origin',x:1200,y:4300,img:'',name:'理灭剑 Venuzdonoa',rl:'Origin Magic · Pedang Pemusnah Hukum',kanji:'理滅剣ヴェヌズドノア',c1:'#0e7490',c2:'#22d3ee',
+  desc:'ASAL-USUL: Origin Magic (起源魔法) — sihir yang meminjam kekuatan dari "origin" atau asal-usul suatu hal. Pedang ini adalah salah satu sihir paling kuat yang pernah ada, diciptakan oleh Anos Voldigoad. Kemampuannya adalah menghancurkan segala sesuatu — tidak peduli seberapa kuat, cepat, atau abadi — termasuk hukum, takdir, dan konsep itu sendiri. Karena kekuatannya yang terlalu besar, pedang ini hanya bisa dipanggil di dekat Kastil Iblis Delsgade, atau melalui Sasha Necron yang memiliki Mata Iblis Penghancur. Di volume akhir, pedang ini menjadi kunci dalam pertempuran melawan entitas tingkat dunia.'},
+ {id:'delsgade',g:'magic_origin',x:1400,y:4300,img:'',name:'魔王城召唤 Delsgade',rl:'Origin Magic · Pemanggilan Kastil',kanji:'魔王城デルゾゲード',c1:'#0e7490',c2:'#22d3ee',
+  desc:'ASAL-USUL: Origin Magic (起源魔法) — sihir yang memanggil Kastil Iblis Delsgade, kediaman Raja Iblis Tirani. Di masa lalu (2000 tahun lalu), kastil ini adalah bangunan fisik yang permanen dan tidak bisa dipindahkan. Namun, Anos mengubahnya menjadi sihir panggilan dengan meminjam kekuatan kastil dari masa lalu. Kelemahannya: membutuhkan魔力 yang sangat besar dan hanya bisa dipertahankan selama 5 menit. Kastil ini juga berfungsi sebagai medan pertempuran yang menguntungkan Anos.'},
+ {id:'zolaedypt',g:'magic_origin',x:1600,y:4300,img:'',name:'獄炎鎖縛魔法陣 Zola e Dypt',rl:'Origin Magic · Rantai Api Neraka',kanji:'獄炎鎖縛魔法陣ゾラ・エ・ディプト',c1:'#0e7490',c2:'#22d3ee',
+  desc:'ASAL-USUL: Origin Magic (起源魔法) — sihir yang menciptakan rantai api hitam yang mengikat target dan menyegel魔力 mereka. Rantai-rantai ini kemudian membentuk lingkaran sihir (magic circle) yang melancarkan serangan pamungkas. Anos menggunakan sihir ini untuk mengunci lawan-lawannya yang kuat.'},
+ {id:'jirasd',g:'magic_origin',x:1800,y:4300,img:'',name:'魔黒雷帝 Jirasd',rl:'Origin Magic · Kaisar Petir Hitam',kanji:'魔黒雷帝ジラスド',c1:'#0e7490',c2:'#22d3ee',
+  desc:'ASAL-USUL: Origin Magic (起源魔法) — sihir petir hitam yang diwariskan di antara keluarga kerajaan iblis. Karena merupakan Origin Magic, sihir ini meminjam kekuatan dari "petir hitam" purba yang ada sejak awal dunia. Anos dan Sasha Necron sama-sama bisa menggunakan sihir ini, meskipun kekuatan Anos jauh lebih besar.'},
+ {id:'gyze',g:'magic_origin',x:2000,y:4300,img:'',name:'魔黒雷帝 Gyze',rl:'Origin Magic · Petir Hitam Lanjutan',kanji:'魔黒雷帝ギゼ',c1:'#0e7490',c2:'#22d3ee',
+  desc:'ASAL-USUL: Origin Magic (起源魔法) — versi lanjutan dari Jirasd. Sihir ini melepaskan petir hitam dalam skala yang jauh lebih besar, mampu menghancurkan seluruh medan pertempuran. Anos menggunakannya sebagai salah satu serangan andalannya.'},
+
+ // --- ROOT MAGIC (根源魔法) ---
+ {id:'silica',g:'magic_root',x:2300,y:4300,img:'',name:'転生 Silica',rl:'Root Magic · Reinkarnasi',kanji:'転生シリカ',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'ASAL-USUL: Root Magic (根源魔法) — sihir yang memungkinkan jiwa seseorang untuk bereinkarnasi ke masa depan dengan membawa ingatan dan kekuatan mereka. Ini adalah sihir yang digunakan Anos untuk bereinkarnasi 2000 tahun setelah kematiannya. Ada versi yang lebih canggih bernama "Gijelica" (母胎転生) yang memungkinkan reinkarnasi ke dalam rahim ibu. Sihir ini sangat langka dan hanya bisa digunakan oleh iblis dengan kekuatan luar biasa.'},
+ {id:'dinojekses',g:'magic_root',x:2500,y:4300,img:'',name:'分離融合転生 Dino Jekses',rl:'Root Magic · Reinkarnasi Fusi',kanji:'分離融合転生ディノ・ジェクセス',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'ASAL-USUL: Root Magic (根源魔法) — dikembangkan oleh Aivis Necron, salah satu Tujuh Tua Raja Iblis. Sihir ini memisahkan sumber (root) seseorang, lalu menggabungkannya kembali dengan sumber lain melalui sihir fusi, menciptakan iblis yang jauh lebih kuat. Misha dan Sasha Necron pernah menggunakan sihir ini untuk berfusi menjadi "Aisha" — wujud gabungan mereka yang sangat kuat.'},
+ {id:'agronemt',g:'magic_root',x:2700,y:4300,img:'',name:'根源再生 Agronemt',rl:'Root Magic · Regenerasi Akar',kanji:'根源再生アグロネムト',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'ASAL-USUL: Root Magic (根源魔法) — sihir yang menggunakan serangan musuh dan sumber target sebagai "origin" untuk memulihkan sumber target ke keadaan sebelum serangan. Karena membutuhkan pengetahuan tentang serangan musuh, sihir ini hanya efektif dari serangan kedua dan seterusnya. Anos menggunakannya untuk melindungi sekutunya dari serangan mematikan.'},
+
+ // --- ABYSS MAGIC (深淵魔法) ---
+ {id:'egilgrone',g:'magic_abyss',x:3000,y:4300,img:'',name:'深淵魔法 Egil Grone Angdroa',rl:'Abyss Magic · Sihir Jurang',kanji:'深淵魔法エギル・グローネ・アンドロア',c1:'#be185d',c2:'#f472b6',
+  desc:'ASAL-USUL: Abyss Magic (深淵魔法) — sihir tingkat tertinggi yang berasal dari "jurang" (abyss) di Laut Suci Perak. Sihir ini diciptakan oleh Noah (identitas masa lalu Anos) 17.000 tahun yang lalu. Kemampuannya adalah menghancurkan dan menyerap segala sesuatu, termasuk konsep dan hukum. Hanya Anos (sebagai Noah) dan beberapa entitas tingkat tinggi yang bisa menggunakannya. Di volume 15-17, sihir ini menjadi kunci dalam konflik antar-dunia.'},
+ {id:'venuzdnor_abyss',g:'magic_abyss',x:3200,y:4300,img:'',name:'深淵魔法 Venuzdnor',rl:'Abyss Magic · Versi Jurang',kanji:'深淵魔法ヴェヌズドノール',c1:'#be185d',c2:'#f472b6',
+  desc:'ASAL-USUL: Abyss Magic (深淵魔法) — versi "jurang" dari pedang Venuzdonoa. Jika Venuzdonoa adalah Origin Magic, maka Venuzdnor adalah bentuk aslinya yang berasal dari Abyss. Pedang ini memiliki kekuatan yang jauh lebih besar dan hanya bisa digunakan oleh Anos dalam wujud Noah-nya. Di volume akhir, pedang ini digunakan untuk melawan entitas yang mengancam seluruh Laut Suci Perak.'},
+
+ // --- MAGIC LAINNYA (Sihir Umum) ---
+ {id:'benoyevun',g:'magic',x:3500,y:4300,img:'',name:'四界壁 Beno Yevun',rl:'Magic · Dinding Empat Dunia',kanji:'四界壁ベノ・イェヴン',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Diciptakan 2000 tahun lalu oleh kerja sama empat pihak: Dewi Pencipta Militia, Roh Agung Reno, Pahlawan Kanon, dan Raja Iblis Anos. Sihir ini menciptakan dinding pemisah raksasa antara empat dunia (manusia, iblis, roh, dan dewa). Dinding ini menolak dan menghancurkan segala sesuatu yang mencoba melewatinya, dan sangat efektif melawan dewa. Sihir ini adalah salah satu pencapaian terbesar dari aliansi 2000 tahun lalu.'},
+ {id:'alto',g:'magic',x:3700,y:4300,img:'',name:'加護 Alto',rl:'Magic · Perlindungan Ilahi',kanji:'加護アルト',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Dikembangkan oleh Anos Voldigoad untuk melindungi Izabella (ibunya) dari serangan Emilia. Sihir ini secara otomatis mendeteksi ancaman dan mengaktifkan pertahanan yang sesuai, bahkan tanpa kesadaran penggunanya. Ini adalah sihir yang sangat canggih karena menggabungkan deteksi otomatis dengan respons adaptif.'},
+ {id:'venejiara',g:'magic',x:3900,y:4300,img:'',name:'波身蓋然顕現 Venejiara',rl:'Magic · Manifestasi Probabilitas',kanji:'波身蓋然顕現ヴェネジアラ',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir ciptaan Anos yang memungkinkan魔力-nya untuk "berfluktuasi" di antara berbagai kemungkinan. Efeknya: Anos bisa menyerang sambil berdiri diam, karena serangannya ada di "kemungkinan" yang berbeda dari keberadaannya saat ini. Sihir ini sangat sulit dilawan karena menyerang dari ruang probabilitas yang tidak bisa dijangkau oleh pertahanan normal.'},
+ {id:'jiograze',g:'magic',x:4100,y:4300,img:'',name:'獄炎殲滅砲 Jio Graze',rl:'Magic · Meriam Api Neraka',kanji:'獄炎殲滅砲ジオ・グレイズ',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir api tingkat tertinggi yang melepaskan "matahari hitam" seperti komet. Di Zaman Mitos, satu orang bisa meluncurkan beberapa sekaligus. Namun, di era modern, 20 penyihir yang bekerja sama hanya memiliki tingkat keberhasilan 20%. Anos dan Sasha Necron adalah beberapa dari sedikit orang yang bisa menggunakan sihir ini dengan mudah. Dolzork (Dewa Penyihir) juga menguasai sihir ini.'},
+ {id:'demon_eyes',g:'magic',x:4300,y:4300,img:'',name:'魔眼 Demon Eyes',rl:'Magic · Mata Iblis',kanji:'魔眼',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir mata yang memungkinkan penggunanya untuk melihat aliran darah,魔力, dan bahkan jarak jauh. Sasha Necron memiliki versi yang jauh lebih kuat: "Mata Iblis Penghancur" (破滅の魔眼), yang bisa mendekomposisi segala sesuatu yang dilihatnya — termasuk pikiran, sihir, dan bahkan konsep. Anos juga memiliki "Mata Sihir Ungu" yang bisa menetralkan kekuatan ilahi.'},
+ {id:'zect',g:'magic',x:3500,y:4550,img:'',name:'契約 Zect',rl:'Magic · Kontrak Absolut',kanji:'契約ゼクト',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir kontrak yang mengikat kedua belah pihak dengan魔力. Jika salah satu pihak melanggar kontrak, mereka akan kehilangan nyawa. Namun, jika perbedaan魔力 antara kedua pihak terlalu besar, pihak yang lebih kuat bisa membatalkan kontrak secara sepihak. Anos sering menggunakan sihir ini untuk membuat perjanjian dengan dewa-dewa.'},
+ {id:'leaks',g:'magic',x:3700,y:4550,img:'',name:'思念通信 Leaks',rl:'Magic · Komunikasi Telepati',kanji:'思念通信リークス',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir komunikasi yang memungkinkan penggunanya untuk berbicara dengan orang lain dari jarak jauh. Jika perbedaan魔力 terlalu besar, komunikasi bisa disadap. Anos sering menggabungkannya dengan "魔王軍 Guys" untuk membangun jaringan komunikasi dengan pasukannya.'},
+ {id:'ibis',g:'magic',x:3900,y:4550,img:'',name:'創造建築 Ibis',rl:'Magic · Konstruksi Kreatif',kanji:'創造建築イビス',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir yang memungkinkan penggunanya untuk menciptakan berbagai objek, dari kastil raksasa hingga perhiasan dan pakaian. Misha Necron sangat ahli dalam sihir ini, dan sering menggunakannya untuk membantu teman-temannya. Sihir ini adalah salah satu sihir fundamental yang diajarkan di Akademi Raja Iblis.'},
+ {id:'guys',g:'magic',x:4100,y:4550,img:'',name:'魔王軍 Guys',rl:'Magic · Pasukan Raja Iblis',kanji:'魔王軍ガイズ',c1:'#0891b2',c2:'#67e8f9',
+  desc:'ASAL-USUL: Sihir yang memungkinkan Anos untuk memberikan kekuatan khusus kepada pasukannya, seperti "Penjaga" (Guardian), "Penyihir" (Mage), "Penyembuh" (Healer), dan lain-lain. Sihir ini meningkatkan kekuatan seluruh pasukan secara kolektif, dan merupakan salah satu alasan mengapa pasukan Anos sangat kuat.'},
+ {id:'gijelica',g:'magic_root',x:2900,y:4550,img:'',name:'母胎転生 Gijelica',rl:'Root Magic · Reinkarnasi Rahim',kanji:'母胎転生ギジェリカ',c1:'#6d28d9',c2:'#a78bfa',
+  desc:'ASAL-USUL: Root Magic (根源魔法) — versi lanjutan dari "Silica" yang memungkinkan reinkarnasi ke dalam rahim seorang ibu. Sihir ini lebih aman daripada reinkarnasi biasa karena jiwa tidak perlu berkelana di antara kehidupan dan kematian. Anos menggunakan sihir ini untuk bereinkarnasi ke dalam kandungan ibunya, Izabella.'},
+{id:'parrington', g:'deep', x:4500, y:750, img:'Parrington.png', 
+ name:'Parrington Anessa', rl:'Adik Luna · Obsesif', kanji:'パリントン・アネッサ', 
+ c1:'#1a237e', c2:'#00bcd4',
+ desc:'Adik laki-laki Luna dari Dunia Jurang Reruntuhan Evezeino. Terobsesi secara tidak sehat untuk menikahi kakaknya sendiri, Luna, dan menganggap hubungan darah sebagai penghalang cinta. Membuat perjanjian dengan Kaisar Boneka Bez untuk mendapatkan otoritas 〈Benang Merah〉, lalu memanipulasi kakeknya Dominic untuk mengubah Luna menjadi Putri Jurang Bencana. Setelah Luna jatuh ke dunia fana, ia menjadi penguasa Dunia Boneka Lutzendfort sebagai boneka ajaib. Ia pernah menahan Venuzdonoa yang tidak sempurna dengan telapak tangannya saat menyelamatkan Izabella (reinkarnasi Luna). Dikalahkan dan dibunuh oleh Anos setelah berusaha menimpa ingatan Izabella dengan ingatan Luna.'},
+  // === OTTOLULU ===
+ {id:'ottolulu', g:'dewa', x:2800, y:3500,img:'Ottlulu.png',name:'Ottolulu', rl:'Dewi Arbitrase · Pablohetara', kanji:'オットルルー', 
+  c1:'#831843', c2:'#f472b6',
+  desc:'Dewi Arbitrase yang menilai keanggotaan di Akademi Perak Suci Pablohetara dan membantu dunia baru bergabung. Berasal dari Dunia Air Perak Listeria, dunia kuat yang mencapai lapisan ke-99 pada puncak kemakmurannya. 14.000 tahun lalu, Pertapa Elmide (penguasa Listeria) tiba-tiba menjadi gila saat mendekati jurang maut. Ottolulu mencoba membujuknya, tetapi ia dikalahkan. Pada akhirnya, Elmide menghancurkan Dewa Utama mereka sebelum bunuh diri. Kenangan penduduk Listeria terkumpul di Jurang Kenangan yang Hancur, dan fragmen kenangan mereka membentuk tubuh Ottolulu karena mereka ingin melestarikan Pablohetara dan dewi yang memimpin hukum-hukumnya. Ia kemudian dihidupkan kembali dalam tubuh yang sedikit berbeda. Sebagai dewa, ia memiliki kekuatan sihir yang hampir tak terbatas dan eksistensi konseptual yang memelihara tatanan dan hukum dunia. Ia memegang kunci jam besar yang terlihat seperti bisa memutar boneka pegas seukuran manusia.'},
+   // === KALTINAS ILBENA ===
+ {id:'kaltinas', g:'laut', x:4500, y:1050, img:'', 
+  name:'Kaltinas Ilbena', rl:'Raja Dunia Istana Perak Balandias', kanji:'カルティナス・イルベナ', 
+  c1:'#475569', c2:'#94a3b8',
+  desc:'Raja Dunia Istana Perak Balandias, juga dikenal sebagai "Raja Tak Tergoyahkan" (不動王). Seorang pria pendek dengan kumis pendek yang mengenakan pakaian mewah dan lencana Pablohetara. Ia sangat arogan, memandang rendah penghuni dunia dangkal bahkan bawahannya sendiri. Licik dan tanpa malu, ia menggunakan metode curang untuk membawa Balandias ke posisinya saat ini, terkenal di Pablohetara karena menyerang pendatang baru. Di bawah kepemimpinannya, Balandias mencapai lapisan ke-21 dengan menargetkan dunia kecil yang lemah, membuat Akademi Tigrisfort mendapat julukan "macan kertas". Ia menemukan bakat Farris Noin dan memerasnya menggunakan kenang-kenangan rekan-rekan Farris yang telah meninggal untuk melayaninya. Ia dikalahkan oleh Anos dalam Perang Hierarki Air Perak dan ditangkap oleh para raja istana setelah Farris membelot.'},
+   // === GIZET ===
+ {id:'gizet', g:'magic', x:4600, y:4300, img:'', 
+  name:'Gizet', rl:'Magic · Kontrak Arbitrase', kanji:'ギゼット', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Sihir kontrak yang digunakan oleh Ottolulu. Digunakan dalam penandatanganan perjanjian antara dunia-dunia kecil di Pablohetara, seperti penerapan "Pertempuran Peringkat Air Perak".'},
+   // === GOZOT ===
+ {id:'gozot', g:'magic', x:4800, y:4300, img:'', 
+  name:'Gozot', rl:'Magic · Aula Kuliah Dunia Lain', kanji:'ゴゾット', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Sihir yang menciptakan aula terisolasi menggunakan kekuatan sihir Istana Pablohetara. Menggunakan sihir di dalam aula tidak memengaruhi ruang nyata, tetapi memungkinkan untuk melihat, berbicara, dan menggunakan sihir kelompok dari luar. Digunakan untuk menciptakan aula di mana sihir dapat digunakan untuk melakukan baptisan tanpa merusak Istana Pablohetara.'},
+   // === RADINA NED ESRA ===
+ {id:'radina', g:'magic', x:5000, y:4300, img:'', 
+  name:'Radina Ned Esra', rl:'Magic · Papan Catur Air Perak', kanji:'ラディナ・ネド・エスラ', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Sihir yang menciptakan papan catur air perak di "Papan Jurang Keterikatan" di dasar Istana Pablohetara. Digunakan oleh Ottolulu dalam konteks Pablohetara.'},
+   // === MATA SIHIR (动画全集) ===
+ {id:'mata_penghancur', g:'magic', x:3500, y:4750, img:'', 
+  name:'破滅の魔眼 · Mata Sihir Penghancur', rl:'Anti-Sihir Tertinggi', kanji:'破滅の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Bentuk tertinggi dari anti-sihir. Menghancurkan segala sesuatu yang dilihat penggunanya — tapi sebenarnya efek "menghancurkan" hanyalah efek samping. Kekuatan intinya adalah menghancurkan rumus sihir. Orang dengan sihir rendah bisa dikalahkan hanya dengan tatapan. Bisa menidurkan orang selama sehari bahkan setahun. Kelemahan: harus melihat sihir/rumusnya. Jika musuh menyembunyikan sihir dengan Lynel, tidak bisa dihancurkan. Pemilik: Anos Voldigoad, Sasha Necron, Avos Dilhevia (imitasi).'},
+ {id:'mata_penciptaan', g:'magic', x:3700, y:4750, img:'', 
+  name:'創造の魔眼 · Mata Sihir Penciptaan', rl:'Menciptakan Apa Pun', kanji:'創造の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir yang mampu menciptakan apa pun yang ada dalam pikiran penggunanya. Karena kekuatan mata ini dan penguasaan Misha atas sihir penciptaan, ia mampu menciptakan Delsgade semu. Pemilik: Misha Necron, Militia.'},
+ {id:'mata_kemahakuasaan', g:'magic', x:3900, y:4750, img:'', 
+  name:'創滅の魔眼 · Mata Sihir Kemahakuasaan', rl:'Fusi Cipta & Hancur', kanji:'創滅の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Bentuk fusi dari Mata Sihir Penciptaan dan Mata Sihir Penghancur. Memiliki kekuatan untuk menghancurkan dan menciptakan ulang apa pun. Dapat mengubah objek menjadi kristal es. Pemilik: Aisha Necron (fusi Misha & Sasha).'},
+ {id:'mata_absurditas', g:'magic', x:4100, y:4750, img:'', 
+  name:'背理の魔眼 · Mata Sihir Absurditas', rl:'Penghancur Tatanan', kanji:'背理の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir milik Genedonov, Dewi Absurditas. Memiliki kekuatan untuk menghancurkan semua sihir dan menciptakan ulang segala sesuatu yang ada, termasuk tatanan dewa-dewa lain. Pemilik: Genedonov (Arcana).'},
+ {id:'mata_mauve', g:'magic', x:4300, y:4750, img:'', 
+  name:'滅紫の魔眼 · Mata Sihir Mauve', rl:'Penghancur Dewa', kanji:'滅紫の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir berwarna ungu yang mampu menghancurkan dewa dan tatanan mereka, serta melemahkan senjata ilahi. Ciri khas garis keturunan Voldigoad. Pemilik: Anos Voldigoad, Ceris Voldigoad, Gusta.'},
+ {id:'mata_petir', g:'magic', x:3500, y:5000, img:'', 
+  name:'滅紫の雷眼 · Mata Petir Mauve', rl:'Penghancur Kemungkinan', kanji:'滅紫の雷眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir unik Ceris Voldigoad. Dapat memproyeksikan petir yang menghancurkan kemungkinan. Setelah menghilangkan kekuatan petirnya, berubah menjadi Mata Sihir Mauve. Pemilik: Ceris Voldigoad, Gusta.'},
+ {id:'mata_kekacauan', g:'magic', x:3700, y:5000, img:'', 
+  name:'混滅の魔眼 · Mata Sihir Kekacauan', rl:'Penghancur yang Tak Terhancurkan', kanji:'混滅の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir asli Raja Iblis Tirani. Berwarna ungu dengan salib tergambar di pupil. Mampu menghancurkan bahkan yang tak dapat dihancurkan. Hanya dengan membukanya, dunia mulai runtuh. Pemilik: Anos Voldigoad, Noah.'},
+ {id:'mata_transkripsi', g:'magic', x:3900, y:5000, img:'', 
+  name:'転写の魔眼 · Mata Sihir Transkripsi', rl:'Menyalin Sihir', kanji:'転写の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir milik Costoria Atzenon. Dapat menyalin sihir apa pun hanya dengan sekali pandang. Hasil duplikasi sedikit lebih rendah kualitasnya. Pemilik: Costoria Atzenon, Dominic (pinjam).'},
+ {id:'mata_kegelapan', g:'magic', x:4100, y:5000, img:'', 
+  name:'常闇の魔眼 · Mata Sihir Kegelapan Abadi', rl:'Penjara Kegelapan', kanji:'常闇の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir Raja Iblis Agung Zinia Shivaheld. Memenjarakan mereka yang ditatapnya dalam kegelapan tak terbatas. Cukup kuat untuk menyaingi Mata Sihir Kekacauan. Pemilik: Zinia Shivaheld.'},
+ {id:'mata_heartfire', g:'magic', x:4300, y:5000, img:'', 
+  name:'心火の魔眼 · Mata Sihir Heartfire', rl:'Penyerap Kebencian', kanji:'心火の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir Raja Iblis Pertama Amur Veewither, diwarisi dari ibunya Minea. Memungkinkan penyerapan kebencian dan mengubahnya menjadi kekuatan sihir. Juga menyerap ingatan. Pemilik: Amur Veewither, Minea.'},
+ {id:'mata_rietsu', g:'magic', x:4500, y:4750, img:'', 
+  name:'理滅の魔眼 · Mata Sihir Rietsu', rl:'Perubahan Mata Ilahi Akhir', kanji:'理滅の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir yang terbentuk ketika Sasha menggunakan Venuzdonoa. Merupakan perubahan dari 〈終滅の神眼〉. Pemilik: Sasha Necron.'},
+ {id:'mata_rampage', g:'magic', x:4500, y:5000, img:'', 
+  name:'暴爆の魔眼 · Mata Sihir Rampage', rl:'Melihat & Meledakkan Sihir', kanji:'暴爆の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir Janeldefok, Dewa Penglihatan Sihir. Memberikan persepsi luar biasa, memungkinkan pengguna melihat rumus dan teknik sihir, serta meledakkan sihir atau kemampuan unik lainnya. Pemilik: Janeldefok.'},
+ {id:'mata_ilahi_asal', g:'magic', x:4700, y:4750, img:'', 
+  name:'源創の神眼 · Mata Ilahi Asal', rl:'Menciptakan Sumber & Konsep', kanji:'源創の神眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Ilahi Militia, Dewi Penciptaan. Mampu menciptakan tidak hanya materi, tetapi juga sumber dan konsep. Pemilik: Militia.'},
+ {id:'mata_ilahi_akhir', g:'magic', x:4700, y:5000, img:'', 
+  name:'終滅の神眼 · Mata Ilahi Akhir', rl:'Menghancurkan Segala Hal', kanji:'終滅の神眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Ilahi Abernyu, Dewi Penghancuran. Dapat menghancurkan tidak hanya materi, tetapi juga sumber, konsep, dan semua hal lainnya. Pemilik: Abernyu.'},
+ {id:'mata_ilahi_mendalam', g:'magic', x:4900, y:4750, img:'', 
+  name:'深奥の神眼 · Mata Ilahi Mendalam', rl:'Menembus Jurang', kanji:'深奥の神眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Ilahi Dilfred, Dewa Kedalaman. Dapat menembus jurang segala sesuatu dan memungkinkannya untuk melihat titik lemah dalam rumusan mantra. Pemilik: Dilfred.'},
+ {id:'mata_jauh', g:'magic', x:4900, y:5000, img:'', 
+  name:'遠見の魔眼 · Mata Sihir Penglihatan Jauh', rl:'Melihat Jarak Jauh', kanji:'遠見の魔眼', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Mata Sihir yang memungkinkan penggunanya untuk melihat hal-hal yang tidak terlihat oleh mata biasa, termasuk jarak jauh. Merupakan salah satu Mata Sihir umum yang bisa dipelajari. Pemilik: Umum (dapat dipelajari).'},
+   // === COSTORIA ARZENON ===
+ {id:'costoria', g:'deep', x:4500, y:1500,img:'Coastria.png', 
+  name:'Costoria Arzenon', rl:'Singa Kehancuran · Mata Transkripsi', kanji:'コーストリア・アーツェノン', 
+  c1:'#1a237e', c2:'#00bcd4',
+  desc:'Salah satu Singa Kehancuran dari Dunia Jurang Reruntuhan Evezeino. Seorang gadis berpenampilan halus dengan rambut dikepang dan mata prostetik yang indah, mengenakan seragam putih dengan liontin Pablohetara. Kepribadiannya mudah kesal, pemarah, tidak terduga, dan keras kepala. Keinginan utamanya adalah iri — ia mencemburui apa yang dimiliki orang lain tetapi ia tidak punya, sambil mengaguminya. Ia sangat membenci dirinya sendiri dan diam-diam mencari sesuatu yang tulus. Memiliki Mata Sihir Transkripsi yang dapat menyalin sihir apa pun hanya dengan sekali pandang. Dalam upacara baptisan, ia mampu meniru semua sihir Anos termasuk Egil Grone Angdroa dan Venuzdonoa, tetapi tidak dapat mengendalikan ketidakmasukalan Venuzdonoa dan akhirnya pedang itu menusuk dirinya sendiri.'},
+  // === SPIRITS (Pendukung) — Gakuin.txt ===
+{id:'epiteo', g:'roh', x:1250, y:2800, img:'', 
+ name:'Epiteo', rl:'Ular Panjang · Roh Legenda', kanji:'長き蛇エピテオ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Roh yang lahir dari legenda ular terpanjang di dunia. Awalnya hanya cukup panjang untuk mengelilingi dunia satu kali, namun karena rumor yang dibesar-besarkan, ia tumbuh hingga mampu melilit dunia 333 kali. Karena panjangnya yang luar biasa, Epiteo hanya bisa hidup di rawa magis di dalam sekolah roh, meskipun kadang-kadang menjulurkan kepalanya ke Tujuh Lautan.[citation:1]'},
+{id:'gawille', g:'roh', x:1430, y:2800, img:'', 
+ name:'Gawille', rl:'Anjing Peri · Roh Anak', kanji:'妖精犬ガウイーレ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Roh anak yang sebagian rubah dan sebagian beruang, hanya muncul di siang hari. Namanya berarti "Anjing Peri" dalam bahasa roh kuno.[citation:1]'},
+{id:'bavroana', g:'roh', x:1610, y:2800, img:'', 
+ name:'Bavroana', rl:'Pendekar Pedang Roh', kanji:'矛盾剣士バブロアナ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Pendekar pedang terkuat di antara para roh, menggunakan tombak dan perisai yang sudah rusak. Ada sedikit rumor tentangnya dan merupakan peri langka yang jarang ditemui. Namanya mengandung paradoks (Mujun Kenshi = Pendekar Pedang Kontradiksi).[citation:1]'},
+{id:'lilan', g:'roh', x:1250, y:3050, img:'', 
+ name:'Lilan', rl:'Peri Buku · 1.799 Buku', kanji:'リーラン', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Peri buku berwujud buku hijau dengan anggota tubuh seperti tongkat. Terdapat 1.799 buku yang berisi informasi tentang roh-roh, tumbuh di pohon-pohon di Hutan Buku yang luas. Ada juga versi putih dengan bulu yang berisi kuis untuk menguji siswa. Setelah tiba di Hutan Buku, Anos menggunakan Ygg Neas untuk mengumpulkan semua 1.799 peri buku dan membacanya dengan cepat. Ia mencatat ada halaman tentang Roh Cinta Fran yang hilang.[citation:1]'},
+{id:'idoam', g:'roh', x:1430, y:3050, img:'', 
+ name:'Idoam', rl:'Roh Gunung Berapi · Hukuman', kanji:'火山精霊イドアム', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Kawah Idoam, Roh Gunung Berapi, digunakan untuk menghukum mereka yang kedapatan berbuat curang selama ujian sekolah roh.[citation:3]'},
+{id:'jijake', g:'roh', x:1610, y:3050, img:'', 
+ name:'Jijake', rl:'Roh Berkaki Enam', kanji:'六本足の精霊ジジェイク', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Roh berkaki enam. Jijake berarti "tanpa rumor" dalam bahasa roh kuno. Meskipun namanya berarti demikian, ia sendiri adalah roh yang disebutkan dalam ujian sekolah roh.[citation:1]'},
+{id:'lava_corpse', g:'roh', x:1790, y:2800, img:'', 
+ name:'Lava Corpse', rl:'Roh Disebutkan · Ujian', kanji:'溶岩の死人', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Mayat Lava disebutkan dalam ujian sekolah roh. Pertanyaan yang melibatkan roh ini juga bisa dijawab oleh Diedilich. Keberadaannya hanya diketahui melalui ujian, bukan kemunculan langsung.[citation:1]'},
+{id:'diedilich', g:'roh', x:1790, y:3050, img:'', 
+ name:'Diedilich', rl:'Roh Disebutkan · Ujian', kanji:'デードイリッヒ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Diedilich disebutkan dalam ujian sekolah roh. Pertanyaan yang melibatkan roh ini juga dapat dijawab dengan Lava Corpse. Seperti Lava Corpse, ia hanya muncul sebagai materi ujian.[citation:1]'},
+{id:'gisra', g:'roh', x:1250, y:3300, img:'', 
+ name:'Gisra', rl:'Roh Perahu · Nelayan', kanji:'ジスラ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh perahu ini juga berhubungan dengan penangkapan ikan.[citation:1]'},
+{id:'met', g:'roh', x:1430, y:3300, img:'', 
+ name:'Met', rl:'Roh Perahu · Nelayan', kanji:'メト', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh perahu ini juga berhubungan dengan penangkapan ikan.[citation:1]'},
+{id:'anoue', g:'roh', x:1610, y:3300, img:'', 
+ name:'Anoue', rl:'Roh Perahu · Nelayan', kanji:'アノウエ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh perahu ini juga berhubungan dengan penangkapan ikan.[citation:1]'},
+{id:'veera', g:'roh', x:1790, y:3300, img:'', 
+ name:'Veera', rl:'Roh Perahu · Nelayan', kanji:'ビーラ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Salah satu dari empat roh perahu. Meskipun hanya tujuh belas roh yang berhubungan dengan penangkapan ikan, dapat dikatakan bahwa keempat roh perahu ini juga berhubungan dengan penangkapan ikan.[citation:1]'},
+{id:'guniel', g:'roh', x:1250, y:3550, img:'', 
+ name:'Tangga Guniel', rl:'Roh Ujian · Tangga Keberuntungan', kanji:'グニエールの階段', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Roh yang merujuk pada dua puluh tangga, dan tantangan pertama dari uji coba roh. Sebagai ujian keberuntungan murni, hanya lima tangga yang akan mengarah ke atas sementara lima belas tangga lainnya akan mengarah kembali ke Ruang Uji Coba. Karena ejekan Grysilis, Anos menjadi waspada dan mengubah penampilan semua orang di timnya agar sesuai dengan penampilannya sendiri, sehingga menyulitkan tangga untuk memilihnya.[citation:1]'},
+{id:'cenetello', g:'roh', x:1430, y:3550, img:'', 
+ name:'Cenetello', rl:'Kunang-kunang Penyembuh · Dokter Roh', kanji:'治癒蛍セネテロ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Roh yang muncul sebagai kunang-kunang hijau yang dapat menyembuhkan luka roh lain. Mereka biasa disebut sebagai "dokter roh". Dalam Episode 7 Season 2, Great Spirit Reno memanggil Cenetello untuk menyembuhkan hutan yang layu setelah mengalahkan Gwen.[citation:4]'},
+{id:'ezyssey', g:'roh', x:1610, y:3550, img:'', 
+ name:'Ezyssey', rl:'Musim Semi Waktu · Penjaga Waktu', kanji:'時空の泉エゼッセイ', 
+ c1:'#c2410c', c2:'#fb923c',
+ desc:'Roh yang memiliki kekuatan untuk melakukan perjalanan melalui ruang-waktu. Berbentuk pegas semi transparan dengan aura ungu. Ketika Nosgalia menyerang Roh Agung Reno dan mempercepat pertumbuhan anaknya yang belum lahir, Reno memohon agar seseorang menyelamatkan bayinya, menyebabkan bunga berbentuk tetesan air mata mekar dan melahirkan roh-roh baru. Ezyssey adalah yang terakhir lahir, tetapi Reno memohon agar ia membawa anaknya (Misa) dua ribu tahun ke masa depan, di mana Raja Iblis pasti akan menyelamatkannya.[citation:5]'},
+  // =====================================================================
+ // === NODE TAMBAHAN v3 — MELENGKAPI EDGE YANG SEBELUMNYA HILANG ===
+ // =====================================================================
+
+ // === BALANDIAS / DUNIA ISTANA PERAK ===
+ {id:'farris', g:'laut', x:4200, y:2800, img:'', 
+  name:'Farris Noin', rl:'Arsitek Reinkarnasi Balandias', kanji:'ファリス・ノイン', 
+  c1:'#475569', c2:'#94a3b8',
+  desc:'Arsitek legendaris yang bereinkarnasi di Balandias. Ia mengajari Carzen Elminac dan tukang kayu kastilnya teknik membangun kastil indah, membangkitkan kembali gairah mereka. Ia menyegel lima kastil mahakarya di dalam bingkai lukisan. Setelah kastil-kastil dicuri Tentara Tigrisfort, ia menciptakan kembali mahakaryanya, Zeridheavens, untuk Raja yang Tak Tergoyahkan. Ia kemudian membelot dari Kaltinas.'},
+ {id:'balandialta', g:'laut', x:4200, y:3050, img:'', 
+  name:'Balandialta', rl:'Ibu Kota Balandias', kanji:'バランディアルタ', 
+  c1:'#475569', c2:'#94a3b8',
+  desc:'Ibu kota Dunia Istana Perak Balandias. Pusat kekuasaan Kaltinas Ilbena dan lokasi Istana Perak tempat Perang Hierarki Air Perak berlangsung.'},
+
+ // === KELUARGA JERGA ===
+ {id:'jerga', g:'manusia', x:1060, y:3050, img:'', 
+  name:'Jerga', rl:'Pahlawan Pembunuh Iblis', kanji:'ジェルガ', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Pahlawan manusia yang membenci iblis. Suami Lilia, ayah Rigal. Ia terbunuh dalam pertempuran oleh Anos. Dalam dunia mimpi kontradiktif, ia bereinkarnasi sebagai Matilda. Anos membantu memulihkan ingatannya untuk mencegah perang.'},
+
+ // === MANUSIA PENDUKUNG ===
+ {id:'gazel', g:'manusia', x:1240, y:2600, img:'', 
+  name:'Gazel Apt Ageila', rl:'Ksatria Jiordal', kanji:'ガゼル・アプト・アゲイラ', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Ksatria suci Jiordal yang membuat perjanjian dengan Dewa Penusuk Beheus. Ia menyalurkan kekuatan Beheus ke pedangnya untuk membentuk Tombak Ilahi Behetenos. Ia dikalahkan oleh Anos Voldigoad, yang menggunakan Mata Sihir Ungunya untuk menetralkan kekuatan ilahi Beheus.'},
+ {id:'ricardo', g:'manusia', x:1420, y:2600, img:'', 
+  name:'Ricardo Arbitias', rl:'Prajurit Manusia', kanji:'リカルド・アルビティアス', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Prajurit manusia yang membuat perjanjian dengan Dewa Pedang Merah Gaguna. Ia memanggil Gaguna ke dalam pedangnya, memungkinkan dia menembus sisik Naga Alfa.'},
+ {id:'veaflare', g:'manusia', x:1600, y:2600, img:'', 
+  name:'Veaflare Wips Gadeciola', rl:'Penguasa Gadeciola', kanji:'ヴェアフレア・ウィプス・ガデシオラ', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Penguasa Gadeciola yang membuat perjanjian dengan Dewa Parasitisme Enneteroton. Ketika berhadapan dengan Anos, ia terpaksa menyuruh Enneteroton bunuh diri setelah Anos mengendalikan koloni parasit.'},
+ {id:'kashim', g:'manusia', x:1780, y:2400, img:'', 
+  name:'Kashim', rl:'Mantan Pahlawan', kanji:'カシム', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Mantan pahlawan yang membuat perjanjian dengan Dewa Duplikasi Ausravia. Ia menanamkan Ausravia dan urutan duplikasinya ke dalam Exneisis, Pedang Resonansi Suci, yang digunakan melawan Lay Grandsley.'},
+ {id:'camus', g:'manusia', x:1780, y:2600, img:'', 
+  name:'Camus Anfas', rl:'Penyusup Azesion', kanji:'カムス・アンファス', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Penyusup yang berhasil masuk ke Azesion. Ia mengalahkan Dewa Peluru Ajaib Beztsum, yang harus diselamatkan oleh satu peleton tentara manusia.'},
+ {id:'diedrich', g:'manusia', x:2500, y:3500, img:'', 
+  name:'Diedrich Kreizen Agatha', rl:'Pendekar Suci', kanji:'ディードリヒ・クライゼン・アガタ', 
+  c1:'#6d28d9', c2:'#a78bfa',
+  desc:'Pendekar suci yang berduel melawan Gaetenaros. Bersama Naphta, ia menghadapi rekreasi ordo Voldovaizen dan Freuzaten.'},
+
+ // === DEWA PENDUKUNG ===
+ {id:'ennessone', g:'dewa', x:2140, y:3500, img:'Enisuni.png', 
+  name:'Ennessone', rl:'Dewi Kelahiran', kanji:'エンネソーネ', 
+  c1:'#be185d', c2:'#f472b6',
+  desc:'Dewi Kelahiran yang diselamatkan oleh Rauzel. Ia kemudian menggunakan serbuk sari ilahi Rauzel untuk membawa Rauzel dan teman-temannya ke Laut Ibu. Dewi Pengakhiran Andeluc memanggil ratusan Penjaga Pengakhiran untuk mencegah kelahirannya, namun mereka dikalahkan.'},
+ {id:'gaetenaros', g:'dewa', x:2320, y:3500, img:'', 
+  name:'Gaetenaros', rl:'Dewa Seruling Perubahan', kanji:'ガエテナロス', 
+  c1:'#be185d', c2:'#f472b6',
+  desc:'Dewa yang memiliki Seruling Ilahi Perubahan Ideedroend, yang mampu menciptakan kembali ordo dewa lain. Ia menggunakan seruling ini untuk menciptakan kembali ordo Voldovaizen dan Freuzaten selama duel melawan Diedrich Kreizen Agatha dan Naphta.'},
+ {id:'andeluc', g:'dewa', x:2680, y:3300, img:'', 
+  name:'Andeluc', rl:'Dewi Pengakhiran', kanji:'アンデルク', 
+  c1:'#be185d', c2:'#f472b6',
+  desc:'Dewi Pengakhiran yang memanggil ratusan Penjaga Pengakhiran Veneh Ze Raveil untuk mencegah kelahiran Ennessone, namun mereka dikalahkan.'},
+ {id:'abernyu', g:'dewa', x:2900, y:3300, img:'', 
+  name:'Abernyu', rl:'Dewi Penghancuran', kanji:'アベルニュ', 
+  c1:'#be185d', c2:'#f472b6',
+  desc:'Dewi Penghancuran, saudara Militia. Ia memiliki Mata Ilahi Akhir yang dapat menghancurkan materi, sumber, konsep, dan semua hal. Tubuhnya disegel di Delsgade. Ia bereinkarnasi sebagai Sasha Necron dan menjalin perjanjian cinta dengan Anos. Mata Kekacauan ditukar dengannya.'},
+ {id:'dilfred', g:'dewa', x:3050, y:3300, img:'', 
+  name:'Dilfred', rl:'Dewa Kedalaman', kanji:'ディルフレッド', 
+  c1:'#be185d', c2:'#f472b6',
+  desc:'Dewa Kedalaman yang memiliki Mata Ilahi Mendalam, mampu menembus jurang segala sesuatu dan melihat titik lemah dalam rumusan mantra. Ia bermusuhan dengan Eldmed.'},
+ {id:'janeldefok', g:'dewa', x:3160, y:3050, img:'', 
+  name:'Janeldefok', rl:'Dewa Penglihatan Sihir', kanji:'ジャネルデフォク', 
+  c1:'#be185d', c2:'#f472b6',
+  desc:'Dewa Penglihatan Sihir yang memiliki Mata Sihir Rampage. Mata ini memberikan persepsi luar biasa, memungkinkan pengguna melihat rumus dan teknik sihir, serta meledakkan sihir atau kemampuan unik lainnya.'},
+
+ // === NAGA ===
+ {id:'gordo', g:'naga', x:3580, y:3050, img:'', 
+  name:'Gordo', rl:'Adik Metis', kanji:'ゴルド', 
+  c1:'#a16207', c2:'#facc15',
+  desc:'Adik laki-laki Metis. Ketika Nate meratapi tugas dragonborn baru, Gordo meyakinkannya bahwa saudaranya adalah inti naga, sehingga dragonborn baru akan mewarisi kepribadiannya.'},
+ {id:'naga', g:'naga', x:3400, y:3300, img:'', 
+  name:'Naga Kerajaan', rl:'Pilar Dunia Bawah Tanah', kanji:'王竜', 
+  c1:'#a16207', c2:'#facc15',
+  desc:'Naga Kerajaan yang menjadi pilar penopang Dunia Bawah Tanah. Dragonborn baru harus menjadi pilar tanpa kesempatan hidup, namun Gordo meyakinkan Nate bahwa inti naga akan mewarisi kepribadian pendahulunya.'},
+
+ // === LAUT SUCI PERAK ===
+ {id:'baltzarond', g:'laut', x:4200, y:3300, img:'', 
+  name:'Baltzarond', rl:'Kapten Pemburu Bangsawan', kanji:'バルツァロンド', 
+  c1:'#475569', c2:'#94a3b8',
+  desc:'Kapten Pemburu Bangsawan. Finn adalah salah satu bawahannya. Setelah kapal mereka diledakkan Anos, Baltzarond dan anak buahnya melarikan diri saat diserang Perebut Dua Hukum.'},
+ {id:'elmesia', g:'laut', x:4400, y:3300, img:'', 
+  name:'Elmesia Ketujuh', rl:'Dunia Warzerk', kanji:'エレネシア第七', 
+  c1:'#475569', c2:'#94a3b8',
+  desc:'Dunia Elenesia Ketujuh, tempat Warzerk, Dewa Penghancuran, disembah. Imam Besar Belmas Fazat mendemonstrasikan mantranya untuk memperkuat Ketertiban dengan memuji Warzerk.'},
+
+ // === DUNIA DALAM / EVEZEINO ===
+ {id:'dominik', g:'deep', x:4700, y:1500, img:'', 
+  name:'Dominic', rl:'Kakek Luna & Parrington', kanji:'ドミニク', 
+  c1:'#1a237e', c2:'#00bcd4',
+  desc:'Kakek dari Luna dan Parrington dari Dunia Jurang Reruntuhan Evezeino. Ia dimanipulasi Parrington untuk mengubah Luna menjadi Putri Jurang Bencana. Meminjam Mata Sihir Transkripsi.'},
+ {id:'bez', g:'deep', x:4900, y:1500, img:'', 
+  name:'Bez', rl:'Kaisar Boneka', kanji:'ベズ', 
+  c1:'#1a237e', c2:'#00bcd4',
+  desc:'Kaisar Boneka yang membuat perjanjian dengan Parrington, memberinya otoritas 〈Benang Merah〉. Parrington kemudian menjadi penguasa Dunia Boneka Lutzendfort sebagai boneka ajaib.'},
+ {id:'minea', g:'deep', x:4700, y:1050, img:'', 
+  name:'Minea', rl:'Ibu Amur Veewither', kanji:'ミネア', 
+  c1:'#1a237e', c2:'#00bcd4',
+  desc:'Ibu dari Amur Veewither. Ia mewariskan Mata Sihir Heartfire kepada Amur — mata yang mampu menyerap kebencian dan mengubahnya menjadi kekuatan sihir, serta menyerap ingatan.'},
+
+ // === MAGIC UMUM ===
+ {id:'umum', g:'magic', x:5100, y:4750, img:'', 
+  name:'Umum', rl:'Mata Sihir Dapat Dipelajari', kanji:'一般', 
+  c1:'#0891b2', c2:'#67e8f9',
+  desc:'Kategori Mata Sihir umum yang dapat dipelajari oleh siapa saja, seperti Mata Sihir Penglihatan Jauh (遠見の魔眼) yang memungkinkan penggunanya melihat hal-hal yang tidak terlihat oleh mata biasa, termasuk jarak jauh.'},
+];
+// ror
+const EDGES = [
+ // === EDGE OTTOLULU ===
+ ['ottolulu', 'anos', '裁定 (Arbitrase)', '#f472b6', 'straight', 0, 0],
+ ['ottolulu', 'kaltinas', '調停 (Mediasi)', '#f472b6', 'straight', 0, 0],
+ ['ottolulu', 'gizet', '使用 (Pengguna)', '#f472b6', 'Z', 0, 100],
+ ['ottolulu', 'gozot', '使用 (Pengguna)', '#f472b6', 'Z', 0, 100],
+ ['ottolulu', 'radina', '使用 (Pengguna)', '#f472b6', 'Z', 0, 100],
+
+ // === EDGE KALTINAS ILBENA ===
+ ['kaltinas', 'anos', '敵対 (Bermusuhan)', '#94a3b8', 'straight', 0, 0],
+ ['kaltinas', 'farris', '支配 (Menguasai)', '#94a3b8', 'straight', 0, 0],
+ ['kaltinas', 'balandialta', '使用 (Pengguna)', '#94a3b8', 'Z', 0, 100],
+
+ // === EDGE FAN UNION ===
+ ['ellen','anos','崇拝 (Kagum)','#46a758','Z',0,-100],
+ ['jessica','anos','崇拙','#46a758','Z',0,-100],
+ ['maia','anos','崇拝','#46a758','Z',0,-100],
+ ['nono','anos','崇拝','#46a758','Z',0,-100],
+ ['xia','anos','崇拝','#46a758','Z',0,-100],
+ ['himuka','anos','崇拝','#46a758','Z',0,-100],
+ ['carsa','anos','崇拝','#46a758','Z',0,-100],
+ ['shelia','anos','崇拝','#46a758','Z',0,-100],
+ ['anos','ellen','目をかける (Perhatian)','#46a758','Z',0,100],
+
+ // === EDGE AKADEMI ===
+ ['anos','misha','友人 (Sahabat)','#e5484d','L',-200,0],
+ ['anos','sasha','友人 (Sahabat)','#e5484d','L',-200,0],
+ ['misha','sasha','双子 (Kembar)','#c026d3','straight',0,0],
+ ['anos','lay','友人 (Sahabat)','#e5484d','straight',0,0],
+ ['lay','misa','恋仲 (Asmara)','#fbbf24','straight',0,0],
+ ['anos','misa','友人 (Sahabat)','#e5484d','L',0,150],
+ ['anos','anoshu','＝ (Satu Jiwa)','#e5484d','straight',0,0],
+
+ // === EDGE AVOS DILHEVIA ===
+ ['avos','misa','＝ (Wujud Lain Misa)','#fb923c','straight',0,0],
+ ['avos','anos','倒された (Dikalahkan & Dibebaskan)','#e5484d','Z',0,-150],
+ ['avos','lilan','記録 (Tercatat di Buku ke-1800)','#fb923c','Z',0,100],
+ ['avos','reno','起源 (Asal Legenda)','#e93d82','Z',0,100],
+ ['avos','shin','起源 (Asal Legenda)','#e93d82','Z',0,100],
+
+ // === EDGE EMPAT RAJA JAHAT ===
+ ['anos','eldmed','かつて倒した (Dulu Dikalahkan)','#8e4ec6','Z',0,-200],
+ ['eldmed','anos','執着 (Obsesi)','#8e4ec6','Z',0,200],
+ ['eldmed','jick','二つ名を与える (Memberi Dua Nama)','#8e4ec6','L',300,0],
+ ['eldmed','grad','二つ名を与える','#8e4ec6','L',300,0],
+ ['eldmed','rinka','二つ名を与える','#8e4ec6','L',300,0],
+ ['eldmed','zaburo','二つ名を与える','#8e4ec6','L',300,0],
+
+ // === EDGE KELUARGA ===
+ ['anos','gusta','親子 (Ayah & Anak)','#e93d82','Z',0,-150],
+ ['anos','izabella','親子 (Ibu & Anak)','#e93d82','Z',0,-150],
+
+ // === EDGE 7 TUA RAJA IBLIS ===
+ ['aivis','anos','かつて倒した (Dulu Dikalahkan)','#f76b15','Z',0,200],
+ ['melheis','anos','かつて倒した','#f76b15','Z',0,200],
+ ['gaios','anos','かつて倒した','#f76b15','Z',0,200],
+ ['ydol','anos','かつて倒した','#f76b15','Z',0,200],
+ ['medoin','anos','かつて倒した','#f76b15','Z',0,200],
+ ['zoro','anos','かつて倒した','#f76b15','Z',0,200],
+ ['eldora','anos','かつて倒した','#f76b15','Z',0,200],
+
+ // === EDGE AKADEMI PAHLAWAN ===
+ ['zeshia','eleonore','根源クローン (Klon Sumber)','#f5b400','straight',0,0],
+ ['eleonore','anos','教師として赴任 (Diutus Sebagai Guru)','#f5b400','Z',0,100],
+ ['emilia','anos','複雑な感情 (Perasaan Rumit)','#f5b400','Z',0,100],
+ ['ledriano','anos','','#f5b400','Z',0,100],
+ ['laos','anos','','#f5b400','Z',0,100],
+ ['heine','anos','','#f5b400','Z',0,100],
+ ['zamira','anos','','#f5b400','Z',0,100],
+
+ // === EDGE 2000 TAHUN LALU ===
+ ['militia','kanon','','#3e98f0','straight',0,0],
+ ['kanon','reno','','#3e98f0','straight',0,0],
+ ['reno','shin','夫婦 (Suami-Istri)','#e93d82','straight',0,0],
+ ['kanon','anos','二千年前の知人 (Kenalan 2000 Thn Lalu)','#eab308','Z',0,-200],
+ ['militia','anos','二千年前の知人','#3e98f0','Z',0,-200],
+ ['shin','anos','主従 (Tuan & Pelayan)','#18181b','Z',0,-200],
+
+ // === EDGE KELUARGA MISA ===
+ ['misa','reno','親子 (Ibu & Anak)','#e93d82','Z',0,100],
+ ['misa','shin','親子 (Ayah & Anak)','#e93d82','Z',0,150],
+
+ // === EDGE DEWA TERPILIH ===
+ ['arcana','ahid','契約 (Kontrak)','#12a594','straight',0,0],
+ ['arcana','militia','','#3e98f0','straight',0,0],
+ ['ahid','anos','','#12a594','Z',0,100],
+ ['arcana','anos','','#12a594','Z',0,100],
+
+ // === EDGE DEEP / VOLUME 6-17 ===
+ ['anos','noah','＝ (Identitas Masa Lalu)','#00bcd4','straight',0,0],
+ ['noah','amur','かつての友 (Teman Lama)','#ff5722','straight',0,0],
+ ['noah','zinia','対立 (Konflik)','#009688','Z',0,-100],
+ ['noah','eques','打倒 (Dikalahkan)','#ffc107','Z',0,-100],
+ ['noah','nousgalia','対立','#9c27b0','Z',0,-100],
+ ['noah','graham','対立','#607d8b','Z',0,-100],
+ ['amur','zinia','対立 (Konflik)','#009688','straight',0,0],
+ ['amur','eques','打倒 (Dikalahkan)','#ffc107','Z',0,100],
+ ['amur','vlad','同盟 (Aliansi)','#795548','Z',0,100],
+ ['zinia','eques','対立','#ffc107','Z',0,100],
+ ['zinia','anos','謁見 (Audiensi)','#00bcd4','Z',0,200],
+ ['eques','militia','世界の瑕疵 (Cacat Dunia)','#12a594','Z',0,-100],
+ ['eques','arcana','主従 (Tuan & Pelayan)','#12a594','Z',0,100],
+ ['nousgalia','eldmed','憑依 (Merassuki)','#8e4ec6','straight',0,0],
+ ['nousgalia','reno','呪い (Kutukan)','#34d399','Z',0,100],
+ ['graham','anos','宿敵 (Musuh Bebuyutan)','#607d8b','Z',0,-150],
+ ['graham','eques','創出 (Penciptaan)','#ffc107','Z',0,100],
+ ['vlad','lebrahald','偽装 (Penyamaran)','#795548','straight',0,0],
+ ['vlad','luna','','#8e24aa','Z',0,100],
+ ['lebrahald','luna','約束 (Janji)','#3f51b5','straight',0,0],
+ ['lebrahald','lay','遺言 (Warisan)','#a1a1aa','Z',0,100],
+ ['luna','lay','運命 (Takdir)','#8e24aa','Z',0,150],
+ ['emilia','anoshu','恋愛 (Cinta)','#f5b400','Z',0,200],
+ ['lay','kanon','＝ (Reinkarnasi)','#a1a1aa','straight',0,0],
+
+ // === EDGE KARAKTER PENDUKUNG ===
+ ['noilia','anos','敗北 (Dikalahkan)','#e879f9','Z',0,-100],
+ ['glaze','melheis','指示を受ける (Diperintah)','#e879f9','Z',0,-100],
+ ['glaze','anos','警戒 (Waspada)','#e879f9','Z',0,100],
+ ['leongryzel','anos','嘆願 (Permohonan)','#e879f9','Z',0,-100],
+ ['boros','anos','謁見 (Audiensi)','#e879f9','Z',0,-100],
+ ['liza','anos','感謝 (Terima kasih)','#e879f9','Z',0,-100],
+ ['liza','boros','兄妹 (Kakak-Adik)','#e879f9','straight',0,0],
+ ['kastilsage','izabella','出身国 (Negara Asal)','#a78bfa','Z',0,-100],
+ ['kastilsage','gusta','出身国 (Negara Asal)','#a78bfa','Z',0,-100],
+ ['walimisha','misha','養育 (Membesarkan)','#a78bfa','Z',0,-100],
+ ['lilia','jerga','夫婦 (Suami-Istri)','#a78bfa','straight',0,0],
+ ['lilia','rigal','親子 (Ibu & Anak)','#a78bfa','straight',0,0],
+ ['rigal','jerga','親子 (Ayah & Anak)','#a78bfa','straight',0,0],
+ ['lilia','anos','殺害 (Dibunuh)','#a78bfa','Z',0,100],
+ ['rigal','anos','殺害 (Dibunuh)','#a78bfa','Z',0,100],
+ ['putrilycius','kanon','敵対 (Bermusuhan)','#a78bfa','Z',0,100],
+ ['putrilycius','misa','殺害 (Dibunuh)','#a78bfa','Z',0,-100],
+ ['epiteo','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['gawille','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['bavroana','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['lilan','anos','情報提供 (Memberi Info)','#fb923c','Z',0,-100],
+ ['lilan','misa','情報隠蔽 (Info Tersembunyi)','#fb923c','Z',0,100],
+ ['idoam','reno','試験 (Ujian)','#fb923c','Z',0,-100],
+ ['jijake','reno','試験 (Ujian)','#fb923c','Z',0,-100],
+ ['gisra','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['met','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['anoue','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['veera','reno','生息 (Habitat)','#fb923c','Z',0,-100],
+ ['guniel','anos','試練 (Ujian)','#fb923c','Z',0,-100],
+ ['cenetello','reno','治癒 (Penyembuhan)','#fb923c','Z',0,-100],
+ ['ezyssey','reno','時間移動 (Perjalanan Waktu)','#fb923c','Z',0,-100],
+ ['ezyssey','misa','未来へ (Ke Masa Depan)','#fb923c','Z',0,100],
+ ['ezyssey','nosgalia','対立 (Konflik)','#fb923c','Z',0,200],
+ ['beheus','gazel','契約 (Kontrak)','#f472b6','Z',0,-100],
+ ['beheus','anos','敗北 (Dikalahkan)','#f472b6','Z',0,100],
+ ['beheus','arcana','吸収 (Diserap)','#f472b6','Z',0,100],
+ ['beheus','ahid','命令 (Perintah)','#f472b6','Z',0,100],
+ ['gaguna','ricardo','契約 (Kontrak)','#f472b6','Z',0,-100],
+ ['enneteroton','veaflare','契約 (Kontrak)','#f472b6','Z',0,-100],
+ ['enneteroton','anos','敗北 (Dikalahkan)','#f472b6','Z',0,100],
+ ['austria','kashim','契約 (Kontrak)','#f472b6','Z',0,-100],
+ ['austria','lay','対立 (Konflik)','#f472b6','Z',0,100],
+ ['garmrgund','anos','襲撃 (Menyerang)','#f472b6','Z',0,100],
+ ['schnelde','anos','襲撃 (Menyerang)','#f472b6','Z',0,100],
+ ['amysius','anos','襲撃 (Menyerang)','#f472b6','Z',0,100],
+ ['dolzork','anos','襲撃 (Menyerang)','#f472b6','Z',0,100],
+ ['rauzel','ennessone','救助 (Penyelamatan)','#f472b6','Z',0,-100],
+ ['voldovaizen','gaetenaros','再現 (Rekreasi)','#f472b6','Z',0,-100],
+ ['voldovaizen','diedrich','対立 (Konflik)','#f472b6','Z',0,100],
+ ['freuzaten','gaetenaros','再現 (Rekreasi)','#f472b6','Z',0,-100],
+ ['freuzaten','diedrich','対立 (Konflik)','#f472b6','Z',0,100],
+ ['beztsum','anos','敗北 (Dikalahkan)','#f472b6','Z',0,100],
+ ['beztsum','camus','対立 (Konflik)','#f472b6','Z',0,-100],
+ ['lyeno','arcana','従属 (Tunduk)','#34d399','Z',0,-100],
+ ['lyeno','anos','記憶回復 (Memulihkan Ingatan)','#34d399','Z',0,100],
+ ['reize','eldmed','創造 (Diciptakan)','#34d399','Z',0,-100],
+ ['zeo','eldmed','創造 (Diciptakan)','#34d399','Z',0,-100],
+ ['atro','eldmed','創造 (Diciptakan)','#34d399','Z',0,-100],
+ ['mirahi','anos','召喚 (Dipanggil)','#34d399','Z',0,100],
+ ['veneh','andeluc','召喚 (Dipanggil)','#34d399','Z',0,-100],
+ ['veneh','ennessone','妨害 (Menghalangi)','#34d399','Z',0,100],
+ ['irina','ellen','招待 (Undangan)','#facc15','Z',0,-100],
+ ['irina','ahid','拉致 (Penculikan)','#facc15','Z',0,100],
+ ['delapanbijak','ellen','参加 (Ikut Serta)','#facc15','Z',0,-100],
+ ['metis','gordo','兄妹 (Kakak-Adik)','#facc15','straight',0,0],
+ ['metis','naga','犠牲 (Dikorbankan)','#facc15','Z',0,-100],
+ ['finn','baltzarond','部下 (Bawahan)','#94a3b8','Z',0,-100],
+ ['finn','anos','救助 (Penyelamatan)','#94a3b8','Z',0,100],
+ ['crouton','lebrahald','告発 (Menuduh)','#94a3b8','Z',0,-100],
+ ['crouton','eleonore','遺言 (Wasiat)','#94a3b8','Z',0,100],
+ ['carzen','farris','師事 (Berguru)','#94a3b8','Z',0,-100],
+ ['carzen','kaltinas','仕えていた (Dulu Mengabdi)','#94a3b8','Z',0,100],
+ ['warzerk','elmesia','信仰 (Ibadah)','#94a3b8','Z',0,-100],
+
+ // === EDGE SIHIR → KARAKTER (Origin) ===
+ ['venuzdonoa','anos','使用 (Pengguna Utama)','#22d3ee','Z',0,-150],
+ ['venuzdonoa','sasha','召喚 (Bisa Memanggil)','#22d3ee','Z',0,150],
+ ['delsgade','anos','召喚 (Pemanggil)','#22d3ee','Z',0,-150],
+ ['zolaedypt','anos','使用','#22d3ee','Z',0,-150],
+ ['jirasd','anos','起源 (Asal Sihir)','#22d3ee','Z',0,-150],
+ ['jirasd','sasha','継承 (Pewaris)','#22d3ee','Z',0,150],
+ ['gyze','anos','使用','#22d3ee','Z',0,-150],
+
+ // === EDGE SIHIR → KARAKTER (Root) ===
+ ['silica','anos','使用 (Reinkarnasi)','#a78bfa','Z',0,-150],
+ ['silica','gusta','転生先の父 (Ayah di Kehidupan Baru)','#a78bfa','Z',0,100],
+ ['silica','izabella','転生先の母 (Ibu di Kehidupan Baru)','#a78bfa','Z',0,100],
+ ['dinojekses','aivis','開発 (Pengembang)','#a78bfa','Z',0,-150],
+ ['dinojekses','misha','使用 (Fusi Aisha)','#a78bfa','Z',0,100],
+ ['dinojekses','sasha','使用 (Fusi Aisha)','#a78bfa','Z',0,100],
+ ['agronemt','anos','使用','#a78bfa','Z',0,-150],
+ ['gijelica','anos','使用 (Reinkarnasi Rahim)','#a78bfa','Z',0,-150],
+ ['gijelica','izabella','母胎 (Rahim Ibu)','#a78bfa','Z',0,100],
+
+ // === EDGE SIHIR → KARAKTER (Abyss) ===
+ ['egilgrone','anos','使用 (Sebagai Noah)','#f472b6','Z',0,-150],
+ ['egilgrone','noah','創造 (Pencipta)','#f472b6','Z',0,150],
+ ['egilgrone','amur','対抗 (Penantang)','#f472b6','Z',0,100],
+ ['venuzdnor_abyss','anos','使用 (Bentuk Asli)','#f472b6','Z',0,-150],
+ ['venuzdnor_abyss','noah','起源 (Asal)','#f472b6','Z',0,150],
+
+ // === EDGE SIHIR → KARAKTER (Umum) ===
+ ['benoyevun','anos','共同創造 (Pencipta Bersama)','#67e8f9','Z',0,-150],
+ ['benoyevun','militia','共同創造 (Pencipta Bersama)','#67e8f9','Z',0,100],
+ ['benoyevun','kanon','共同創造 (Pencipta Bersama)','#67e8f9','Z',0,100],
+ ['benoyevun','reno','共同創造 (Pencipta Bersama)','#67e8f9','Z',0,100],
+ ['alto','anos','開発 (Pengembang)','#67e8f9','Z',0,-150],
+ ['alto','izabella','保護対象 (Target Perlindungan)','#67e8f9','Z',0,100],
+ ['venejiara','anos','開発 (Pengembang)','#67e8f9','Z',0,-150],
+ ['jiograze','anos','使用 (Pengguna)','#67e8f9','Z',0,-150],
+ ['jiograze','sasha','使用 (Pengguna)','#67e8f9','Z',0,100],
+ ['jiograze','dolzork','使用 (Dewa Penyihir)','#67e8f9','Z',0,100],
+ ['demon_eyes','sasha','所有者 (Mata Iblis Penghancur)','#67e8f9','Z',0,-150],
+ ['demon_eyes','anos','所有者 (Mata Sihir Ungu)','#67e8f9','Z',0,100],
+ ['zect','anos','使用 (Pengguna)','#67e8f9','Z',0,-150],
+ ['zect','arcana','契約 (Kontrak)','#67e8f9','Z',0,100],
+ ['leaks','anos','使用 (Pengguna)','#67e8f9','Z',0,-150],
+ ['ibis','misha','得意 (Ahli)','#67e8f9','Z',0,-150],
+ ['guys','anos','使用 (Panglima)','#67e8f9','Z',0,-150],
+
+ // === EDGE PARRINGTON ===
+ ['parrington', 'luna', '姉への執着 (Obsesi pada Kakak)', '#8e24aa', 'straight', 0, 0],
+ ['parrington', 'izabella', '転生した姉 (Kakak yang Bereinkarnasi)', '#e93d82', 'Z', 0, 100],
+ ['parrington', 'anos', '宿敵 (Musuh Bebuyutan)', '#00bcd4', 'Z', 0, -150],
+ ['parrington', 'gusta', '因縁 (Karma)', '#a78bfa', 'straight', 0, 0],
+ ['parrington', 'dominik', '祖父 (Kakek)', '#64748b', 'straight', 0, 0],
+ ['parrington', 'bez', '契約 (Kontrak)', '#facc15', 'straight', 0, 0],
+ ['parrington', 'egilgrone', '使用 (Pengguna)', '#f472b6', 'Z', 0, 100],
+
+ // === EDGE MATA SIHIR ===
+ ['mata_penghancur', 'anos', '所有者 (Pemilik)', '#22d3ee', 'Z', 0, -100],
+ ['mata_penghancur', 'sasha', '継承 (Pewaris)', '#22d3ee', 'Z', 0, 100],
+ ['mata_penghancur', 'misa', '模倣 (Imitasi)', '#22d3ee', 'Z', 0, 150],
+ ['mata_penciptaan', 'misha', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_penciptaan', 'militia', '起源', '#22d3ee', 'Z', 0, 100],
+ ['mata_kemahakuasaan', 'mata_penciptaan', '融合', '#22d3ee', 'straight', 0, 0],
+ ['mata_kemahakuasaan', 'mata_penghancur', '融合', '#22d3ee', 'straight', 0, 0],
+ ['mata_kemahakuasaan', 'arcana', '所有者 (Aisha)', '#22d3ee', 'Z', 0, 100],
+ ['mata_absurditas', 'arcana', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_mauve', 'anos', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_mauve', 'gusta', '所有者', '#22d3ee', 'Z', 0, 100],
+ ['mata_petir', 'gusta', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_kekacauan', 'anos', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_kekacauan', 'noah', '所有者', '#22d3ee', 'Z', 0, 100],
+ ['mata_transkripsi', 'costoria', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_transkripsi', 'dominik', '借用', '#22d3ee', 'Z', 0, 100],
+ ['mata_kegelapan', 'zinia', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_heartfire', 'amur', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_heartfire', 'minea', '起源', '#22d3ee', 'Z', 0, 100],
+ ['mata_rietsu', 'sasha', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_rietsu', 'venuzdonoa', '変化 (Perubahan)', '#22d3ee', 'straight', 0, 0],
+ ['mata_rampage', 'janeldefok', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_ilahi_asal', 'militia', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_ilahi_akhir', 'abernyu', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_ilahi_mendalam', 'dilfred', '所有者', '#22d3ee', 'Z', 0, -100],
+ ['mata_jauh', 'umum', '所有者 (Dapat Dipelajari)', '#22d3ee', 'straight', 0, 0],
+
+ // === EDGE ABERNYU ===
+ ['abernyu', 'militia', '姉妹 (Kakak-Adik)', '#12a594', 'straight', 0, 0],
+ ['abernyu', 'sasha', '転生 (Reinkarnasi)', '#12a594', 'Z', 0, 100],
+ ['abernyu', 'anos', '愛 (Cinta · Perjanjian)', '#12a594', 'Z', 0, -100],
+ ['abernyu', 'delsgade', '封印 (Tubuh Disegel)', '#12a594', 'straight', 0, 0],
+ ['abernyu', 'venuzdonoa', '起源 (Asal Pedang)', '#12a594', 'straight', 0, 0],
+ ['abernyu', 'mata_ilahi_akhir', '所有者 (Pemilik)', '#12a594', 'Z', 0, 100],
+ ['abernyu', 'mata_kekacauan', '交換 (Tukar Mata)', '#12a594', 'straight', 0, 0],
+
+ // === EDGE COSTORIA ===
+ ['costoria', 'mata_transkripsi', '所有者 (Pemilik)', '#00bcd4', 'Z', 0, -100],
+ ['costoria', 'anos', '対立 (Konflik)', '#00bcd4', 'Z', 0, 100],
+ ['costoria', 'sasha', '対立 (Konflik)', '#00bcd4', 'Z', 0, 150],
+ ['costoria', 'parrington', '同族 (Sesama Singa Kehancuran)', '#00bcd4', 'straight', 0, 0],
+
+ // === EDGE DILFRED ===
+ ['dilfred', 'eldmed', '対立 (Konflik)', '#12a594', 'Z', 0, 100],
+ ['dilfred', 'mata_ilahi_mendalam', '所有者 (Pemilik)', '#12a594', 'Z', 0, 100],
+
+ // === EDGE MINEA ===
+ ['minea', 'amur', '親子 (Ibu & Anak)', '#ff5722', 'straight', 0, 0],
+ ['minea', 'mata_heartfire', '起源 (Asal Mata Sihir)', '#ff5722', 'Z', 0, 100],
+
+ // === EDGE SPIRITS → RENO ===
+ ['epiteo', 'reno', '所属 (Roh Legenda)', '#34d399', 'Z', 0, -100],
+ ['gawille', 'reno', '所属 (Roh Anak)', '#34d399', 'Z', 0, -100],
+ ['bavroana', 'reno', '所属 (Pendekar Roh)', '#34d399', 'Z', 0, -100],
+ ['lilan', 'reno', '所属 (Peri Buku)', '#34d399', 'Z', 0, -100],
+ ['idoam', 'reno', '所属 (Roh Hukuman)', '#34d399', 'Z', 0, -100],
+ ['jijake', 'reno', '所属 (Roh Ujian)', '#34d399', 'Z', 0, -100],
+ ['mayatlava', 'reno', '所属 (Roh Ujian)', '#34d399', 'Z', 0, -100],
+ ['diedilich', 'reno', '所属 (Roh Ujian)', '#34d399', 'Z', 0, -100],
+ ['gisra', 'reno', '所属 (Roh Perahu)', '#34d399', 'Z', 0, -100],
+ ['met', 'reno', '所属 (Roh Perahu)', '#34d399', 'Z', 0, -100],
+ ['anoue', 'reno', '所属 (Roh Perahu)', '#34d399', 'Z', 0, -100],
+ ['veera', 'reno', '所属 (Roh Perahu)', '#34d399', 'Z', 0, -100],
+ ['guniel', 'reno', '所属 (Roh Ujian)', '#34d399', 'Z', 0, -100],
+ ['cenetello', 'reno', '治癒 (Penyembuh Roh)', '#34d399', 'Z', 0, -100],
+ ['ezyssey', 'reno', '創造 (Diciptakan oleh Reno)', '#34d399', 'straight', 0, 0],
+ ['ezyssey', 'misa', '未来へ (Dikirim ke Masa Depan)', '#fbbf24', 'Z', 0, 150],
+ ['lilan', 'misa', '記録 (Tercatat di Buku)', '#fb923c', 'Z', 0, 100],
+ ['lilan', 'anos', '情報提供 (Memberi Info)', '#fb923c', 'Z', 0, -100],
+ ['guniel', 'anos', '試練 (Ujian Keberuntungan)', '#fb923c', 'Z', 0, -100],
+];
+//ror
+/* =====================================================================
+   BUILD WORLD
+===================================================================== */
+const world = document.getElementById('world');
+const byId = {};
+NODES.forEach(n => { byId[n.id] = n; n._vis = true; });
+
+const boxDef = {
+  academy:[1200,700,1150,980,'academy'], union:[100,700,560,700,'union'],
+  hero:[100,100,1240,330,'hero'], evil:[2400,100,560,570,'evil'], sub:[3050,100,400,450,'sub'],
+  elder:[100,1750,740,400,'elder'], ancient:[1600,1750,800,400,'ancient'],
+  family:[3100,600,520,450,'family'], god:[2700,1750,560,280,'god'],
+    deep:[3400,600,1700,1050,'deep'], silver:[3400,1300,1100,400,'silver'],
+  abyss:[4100,1050,500,300,'abyss'],
+  setan:[100,2700,900,500,'setan'],
+    manusia:[600,2700,900,700,'manusia'],
+  roh:[1150,2700,900,1000,'roh'],
+    dewa:[1900,2700,1400,1000,'dewa'],
+  penjaga:[2650,2700,900,500,'penjaga'],
+    naga:[3300,2700,500,500,'naga'],
+    laut:[3700,2700,900,700,'laut'],
+  magic_origin:[1100,4200,1100,300,'magic_origin'],
+  magic_root:[2200,4200,900,300,'magic_root'],
+  magic_abyss:[2900,4200,600,300,'magic_abyss'],
+    magic:[3400,4200,1900,900,'magic'],
+};
+
+const boxFrag = document.createDocumentFragment();
+Object.entries(boxDef).forEach(([k,[x,y,w,h,gk]]) => {
+  const d = document.createElement('div');
+  d.className = 'gbox';
+  d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-color:${GROUPS[gk].color}40`;
+  d.innerHTML = `<div class="gtitle" style="color:${GROUPS[gk].color}">${GROUPS[gk].name}</div>`;
+  boxFrag.appendChild(d);
+});
+world.appendChild(boxFrag);
+
+const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+svg.id = 'edges';
+world.appendChild(svg);
+
+const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+defs.innerHTML = `
+  <marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 z" fill="context-stroke"/>
+  </marker>`;
+svg.appendChild(defs);
+
+function placeholder(n,h){
+  const ini = n.name.split(' ').map(s=>s[0]).slice(0,2).join('');
+  return `<div class="noimg" style="width:100%;height:${h}px;background:linear-gradient(135deg,${n.c1},${n.c2}22);font-size:26px;font-weight:800;color:${n.c2}">${ini}</div>`;
+}
+
+const nodeFrag = document.createDocumentFragment();
+NODES.forEach(n => {
+  const d = document.createElement('div');
+  d.className = 'node' + (n.big ? ' big' : '') + (n.g.startsWith('magic') ? ' magic' : '');
+  d.id = 'n-' + n.id;
+  d.dataset.id = n.id;
+  d.style.left = n.x + 'px';
+  d.style.top = n.y + 'px';
+  d.style.width = (n.big ? 150 : 118) + 'px';
+  const h = n.big ? 170 : 132;
+  const imgHtml = n.img
+    ? `<img loading="lazy" decoding="async" src="${n.img}" onerror="this.outerHTML=placeholder(byId['${n.id}'],${h})" alt="${n.name}">`
+    : placeholder(n, h);
+  d.innerHTML = `<div class="frame">${imgHtml}
+    <div class="nm">${n.name}</div><div class="rl">${n.rl}</div></div>`;
+  d.addEventListener('mouseenter', () => highlight(n.id));
+  d.addEventListener('mouseleave', () => highlight(null));
+  d.addEventListener('click', e => { e.stopPropagation(); openPanel(n.id); });
+  nodeFrag.appendChild(d);
+  n.el = d;
+});
+world.appendChild(nodeFrag);
+
+/* =====================================================================
+   EDGE ROUTING
+===================================================================== */
+function getCenter(n){
+  return { x: n.x + (n.big ? 75 : 59), y: n.y + (n.big ? 85 : 66) };
+}
+
+const edgeFragSvg = document.createDocumentFragment();
+const edgeFragLabel = document.createDocumentFragment();
+const edgeEls = [];
+
+EDGES.forEach(([a,b,label,color,type,offsetX,offsetY]) => {
+  const A = byId[a], B = byId[b];
+  if(!A || !B) return;
+
+  const cA = getCenter(A), cB = getCenter(B);
+  let pathD = '';
+  let labelX, labelY;
+
+  if(type === 'straight'){
+    pathD = `M ${cA.x} ${cA.y} L ${cB.x} ${cB.y}`;
+    labelX = (cA.x + cB.x) / 2;
+    labelY = (cA.y + cB.y) / 2 - 10;
+  } else if(type === 'L'){
+    if(Math.abs(cA.x - cB.x) > Math.abs(cA.y - cB.y)){
+      pathD = `M ${cA.x} ${cA.y} L ${cA.x + offsetX} ${cA.y} L ${cA.x + offsetX} ${cB.y} L ${cB.x} ${cB.y}`;
+      labelX = cA.x + offsetX;
+      labelY = (cA.y + cB.y) / 2;
+    } else {
+      pathD = `M ${cA.x} ${cA.y} L ${cA.x} ${cA.y + offsetY} L ${cB.x} ${cA.y + offsetY} L ${cB.x} ${cB.y}`;
+      labelX = (cA.x + cB.x) / 2;
+      labelY = cA.y + offsetY;
+    }
+  } else {
+    const midY = (cA.y + cB.y) / 2 + offsetY;
+    pathD = `M ${cA.x} ${cA.y} L ${cA.x} ${midY} L ${cB.x} ${midY} L ${cB.x} ${cB.y}`;
+    labelX = (cA.x + cB.x) / 2 + offsetX;
+    labelY = midY;
+  }
+
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d', pathD);
+  const col = color || '#7c7c95';
+  p.setAttribute('stroke', col);
+  p.style.color = col;
+  p.setAttribute('fill','none');
+  p.setAttribute('marker-end', 'url(#arr)');
+  p.classList.add('edge');
+  edgeFragSvg.appendChild(p);
+
+  let lb = null;
+  if(label){
+    lb = document.createElement('div');
+    lb.className = 'elabel';
+    lb.textContent = label;
+    lb.style.left = labelX + 'px';
+    lb.style.top = labelY + 'px';
+    edgeFragLabel.appendChild(lb);
+  }
+  edgeEls.push({ a, b, p, lb, _vis: true });
+});
+
+svg.appendChild(edgeFragSvg);
+world.appendChild(edgeFragLabel);
+
+/* =====================================================================
+   VIEWPORT CULLING
+===================================================================== */
+const vp = document.getElementById('viewport');
+let tx = 70, ty = 30, sc = 0.60;
+
+const CULL_MARGIN = 500;
+let cullRaf = 0;
+
+function cull(){
+  const r = vp.getBoundingClientRect();
+  const vx1 = (-tx) / sc - CULL_MARGIN;
+  const vy1 = (-ty) / sc - CULL_MARGIN;
+  const vx2 = (r.width - tx) / sc + CULL_MARGIN;
+  const vy2 = (r.height - ty) / sc + CULL_MARGIN;
+
+  for(let i = 0; i < NODES.length; i++){
+    const n = NODES[i];
+    const w = n.big ? 150 : 118;
+    const h = n.big ? 170 : 132;
+    const visible = (n.x + w > vx1) && (n.x < vx2) &&
+                    (n.y + h > vy1) && (n.y < vy2);
+    if(n._vis !== visible){
+      n._vis = visible;
+      n.el.style.display = visible ? '' : 'none';
+    }
+  }
+
+  for(let i = 0; i < edgeEls.length; i++){
+    const e = edgeEls[i];
+    const A = byId[e.a], B = byId[e.b];
+    if(!A || !B) continue;
+    const minX = Math.min(A.x, B.x) - 200;
+    const maxX = Math.max(A.x, B.x) + 200;
+    const minY = Math.min(A.y, B.y) - 200;
+    const maxY = Math.max(A.y, B.y) + 200;
+    const visible = (maxX > vx1) && (minX < vx2) &&
+                    (maxY > vy1) && (minY < vy2);
+    if(e._vis !== visible){
+      e._vis = visible;
+      e.p.style.display = visible ? '' : 'none';
+      if(e.lb) e.lb.style.display = visible ? '' : 'none';
+    }
+  }
+}
+
+function apply(){
+  world.style.transform = `translate3d(${tx}px,${ty}px,0) scale(${sc})`;
+  if(cullRaf) return;
+  cullRaf = requestAnimationFrame(() => {
+    cullRaf = 0;
+    cull();
+  });
+}
+
+/* =====================================================================
+   HIGHLIGHT
+===================================================================== */
+let labelsOn = false;
+const highlightSet = new Set();
+
+function highlight(id){
+  if(!id){
+    for(let i = 0; i < edgeEls.length; i++){
+      const e = edgeEls[i];
+      e.p.classList.remove('hl','dimmed');
+      if(e.lb){
+        e.lb.classList.remove('hl');
+        if(labelsOn) e.lb.classList.add('showall');
+      }
+    }
+    for(let i = 0; i < NODES.length; i++){
+      NODES[i].el.classList.remove('hl','dimmed');
+    }
+    return;
+  }
+
+  highlightSet.clear();
+  highlightSet.add(id);
+
+  for(let i = 0; i < edgeEls.length; i++){
+    const e = edgeEls[i];
+    const on = (e.a === id || e.b === id);
+    e.p.classList.toggle('hl', on);
+    e.p.classList.toggle('dimmed', !on);
+    if(e.lb) e.lb.classList.toggle('hl', on);
+    if(on){ highlightSet.add(e.a); highlightSet.add(e.b); }
+  }
+
+  for(let i = 0; i < NODES.length; i++){
+    const n = NODES[i];
+    n.el.classList.toggle('hl', highlightSet.has(n.id));
+    n.el.classList.toggle('dimmed', !highlightSet.has(n.id));
+  }
+}
+
+/* =====================================================================
+   INFO PANEL
+===================================================================== */
+const infoPanel = document.getElementById('infoPanel');
+const panelLine = document.getElementById('panelLine');
+const panelLineEl = panelLine.querySelector('line');
+const ipAv = document.getElementById('ipAv');
+const ipName = document.getElementById('ipName');
+const ipKanji = document.getElementById('ipKanji');
+const ipTags = document.getElementById('ipTags');
+const ipDesc = document.getElementById('ipDesc');
+const ipRels = document.getElementById('ipRels');
+
+infoPanel.addEventListener('click', e => e.stopPropagation());
+
+function miniImg(n, s){
+  return n.img
+    ? `<img loading="lazy" src="${n.img}" onerror="this.outerHTML='<div class=ph style=&quot;width:${s}px;height:${s}px;background:linear-gradient(135deg,${n.c1},${n.c2})&quot;></div>'" style="width:${s}px;height:${s}px">`
+    : `<div class="ph" style="width:${s}px;height:${s}px;background:linear-gradient(135deg,${n.c1},${n.c2})"></div>`;
+}
+
+function openPanel(id){
+  const n = byId[id];
+  if(!n) return;
+
+  if(n.img){
+    ipAv.src = n.img;
+    ipAv.style.display = 'block';
+    ipAv.onerror = () => { ipAv.style.display = 'none'; };
+  } else {
+    ipAv.style.display = 'none';
+  }
+
+  ipName.textContent = n.name;
+  ipKanji.textContent = n.kanji || '';
+  ipTags.innerHTML =
+    `<span class="ptag" style="color:${GROUPS[n.g].color};border-color:${GROUPS[n.g].color}">${GROUPS[n.g].name.split('·')[1] || GROUPS[n.g].name}</span>
+     <span class="ptag" style="color:#aaa;border-color:#444">${n.rl}</span>`;
+  ipDesc.textContent = n.desc || '';
+
+  const rels = edgeEls.filter(e => e.a === id || e.b === id);
+  ipRels.innerHTML = rels.map(e => {
+    const o = byId[e.a === id ? e.b : e.a];
+    return `<div class="rel" data-go="${o.id}">${miniImg(o, 26)}
+      <div><div class="rnm">${o.name}</div><div class="rlb">${e.lb ? e.lb.textContent : 'Relasi'} ${e.a === id ? '→' : '←'}</div></div></div>`;
+  }).join('');
+
+  const nodeW = n.big ? 150 : 118;
+  const nodeH = n.big ? 170 : 132;
+  const panelW = 300;
+  const gap = 20;
+
+  let px = n.x + nodeW + gap;
+  let py = n.y - 20;
+
+  if(px + panelW > 8900){
+    px = n.x - panelW - gap;
+  }
+  if(py < 20) py = 20;
+  if(py + 420 > 6900) py = 6900 - 420;
+
+  infoPanel.style.left = px + 'px';
+  infoPanel.style.top = py + 'px';
+  infoPanel.classList.add('open');
+
+  const nodeCy = n.y + nodeH / 2;
+  const panelCy = py + 200;
+  const lineStartX = (px > n.x) ? px : px + panelW;
+  const lineEndX = (px > n.x) ? n.x + nodeW : n.x;
+
+  panelLineEl.setAttribute('x1', lineStartX);
+  panelLineEl.setAttribute('y1', panelCy);
+  panelLineEl.setAttribute('x2', lineEndX);
+  panelLineEl.setAttribute('y2', nodeCy);
+  panelLine.style.display = 'block';
+
+  NODES.forEach(m => m.el.classList.toggle('selected', m.id === id));
+
+  ipRels.onclick = (ev) => {
+    const relEl = ev.target.closest('.rel');
+    if(!relEl) return;
+    ev.stopPropagation();
+    const targetId = relEl.getAttribute('data-go');
+    if(!targetId) return;
+    openPanel(targetId);
+    centerOnNode(targetId);
+    highlight(targetId);
+    clearTimeout(window.__hlTimer);
+    window.__hlTimer = setTimeout(() => highlight(null), 1500);
+  };
+}
+
+function closePanel(){
+  infoPanel.classList.remove('open');
+  panelLine.style.display = 'none';
+  for(let i = 0; i < NODES.length; i++){
+    NODES[i].el.classList.remove('selected');
+  }
+  highlight(null);
+}
+
+document.getElementById('infoClose').onclick = closePanel;
+
+/* =====================================================================
+   CAMERA
+===================================================================== */
+let vpRect = null;
+function refreshVpRect(){ vpRect = vp.getBoundingClientRect(); }
+refreshVpRect();
+
+function fitToScreen(){
+  refreshVpRect();
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+  Object.values(boxDef).forEach(([x,y,w,h]) => {
+    if(x < minX) minX = x;
+    if(y < minY) minY = y;
+    if(x + w > maxX) maxX = x + w;
+    if(y + h > maxY) maxY = y + h;
+  });
+
+  const pad = 400;
+  const worldW = maxX - minX + pad * 2;
+  const worldH = maxY - minY + pad * 2;
+
+  const scaleX = vpRect.width / worldW;
+  const scaleY = vpRect.height / worldH;
+
+  sc = Math.min(scaleX, scaleY);
+  sc = Math.max(0.05, Math.min(2.5, sc));
+
+  tx = (vpRect.width - worldW * sc) / 2 - (minX - pad) * sc;
+  ty = (vpRect.height - worldH * sc) / 2 - (minY - pad) * sc;
+
+  apply();
+}
+
+function centerOnNode(id){
+  const n = byId[id];
+  if(!n) return;
+  refreshVpRect();
+  const nodeW = n.big ? 150 : 118;
+  const nodeH = n.big ? 170 : 132;
+  const cx = n.x + nodeW / 2;
+  const cy = n.y + nodeH / 2;
+  tx = vpRect.width / 2 - cx * sc;
+  ty = vpRect.height / 2 - cy * sc;
+  apply();
+}
+
+/* =====================================================================
+   INTERAKSI DRAG / ZOOM
+===================================================================== */
+let drag = false, sx, sy, ox, oy;
+
+const touchState = {
+  mode: null,
+  startDist: 0,
+  startScale: 1,
+  startMid: {x:0,y:0},
+  startTx: 0,
+  startTy: 0,
+  panStart: {x:0,y:0},
+  panStartTx: 0,
+  panStartTy: 0,
+};
+
+vp.addEventListener('mousedown', e => {
+  if(e.target.closest('#infoPanel')) return;
+  drag = true;
+  sx = e.clientX; sy = e.clientY;
+  ox = tx; oy = ty;
+  vp.classList.add('dragging');
+});
+
+window.addEventListener('mousemove', e => {
+  if(!drag) return;
+  tx = ox + e.clientX - sx;
+  ty = oy + e.clientY - sy;
+  apply();
+});
+
+window.addEventListener('mouseup', () => {
+  drag = false;
+  vp.classList.remove('dragging');
+});
+
+vp.addEventListener('wheel', e => {
+  e.preventDefault();
+  const f = e.deltaY < 0 ? 1.12 : 0.89;
+  sc = Math.min(2.2, Math.max(0.05, sc * f));
+  apply();
+}, { passive: false });
+
+function getTouchDist(t1, t2){
+  const dx = t1.clientX - t2.clientX;
+  const dy = t1.clientY - t2.clientY;
+  return Math.hypot(dx, dy);
+}
+
+function getTouchMid(t1, t2){
+  return {
+    x: (t1.clientX + t2.clientX) / 2,
+    y: (t1.clientY + t2.clientY) / 2
+  };
+}
+
+vp.addEventListener('touchstart', e => {
+  if(e.target.closest('#infoPanel')) return;
+
+  if(e.touches.length === 1){
+    touchState.mode = 'pan';
+    touchState.panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchState.panStartTx = tx;
+    touchState.panStartTy = ty;
+    vp.classList.add('dragging');
+  } else if(e.touches.length === 2){
+    e.preventDefault();
+    touchState.mode = 'pinch';
+    touchState.startDist = getTouchDist(e.touches[0], e.touches[1]);
+    touchState.startScale = sc;
+    touchState.startMid = getTouchMid(e.touches[0], e.touches[1]);
+    touchState.startTx = tx;
+    touchState.startTy = ty;
+    vp.classList.remove('dragging');
+  }
+}, { passive: false });
+
+vp.addEventListener('touchmove', e => {
+  if(e.target.closest('#infoPanel')) return;
+
+  if(touchState.mode === 'pan' && e.touches.length === 1){
+    e.preventDefault();
+    const dx = e.touches[0].clientX - touchState.panStart.x;
+    const dy = e.touches[0].clientY - touchState.panStart.y;
+    tx = touchState.panStartTx + dx;
+    ty = touchState.panStartTy + dy;
+    apply();
+  } else if(touchState.mode === 'pinch' && e.touches.length === 2){
+    e.preventDefault();
+    const newDist = getTouchDist(e.touches[0], e.touches[1]);
+    const newMid = getTouchMid(e.touches[0], e.touches[1]);
+
+    const ratio = newDist / touchState.startDist;
+    let newScale = touchState.startScale * ratio;
+    newScale = Math.min(2.2, Math.max(0.05, newScale));
+
+    const midX = touchState.startMid.x - vpRect.left;
+    const midY = touchState.startMid.y - vpRect.top;
+
+    const worldX = (midX - touchState.startTx) / touchState.startScale;
+    const worldY = (midY - touchState.startTy) / touchState.startScale;
+
+    const midDx = newMid.x - touchState.startMid.x;
+    const midDy = newMid.y - touchState.startMid.y;
+
+    sc = newScale;
+    tx = midX - worldX * sc + midDx;
+    ty = midY - worldY * sc + midDy;
+
+    apply();
+  }
+}, { passive: false });
+
+vp.addEventListener('touchend', e => {
+  if(e.target.closest('#infoPanel')) return;
+
+  if(e.touches.length === 0){
+    touchState.mode = null;
+    vp.classList.remove('dragging');
+  } else if(e.touches.length === 1 && touchState.mode === 'pinch'){
+    touchState.mode = 'pan';
+    touchState.panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchState.panStartTx = tx;
+    touchState.panStartTy = ty;
+    vp.classList.add('dragging');
+  }
+}, { passive: false });
+
+vp.addEventListener('touchcancel', () => {
+  touchState.mode = null;
+  vp.classList.remove('dragging');
+});
+
+vp.addEventListener('click', e => {
+  if(e.target.id === 'viewport' || e.target.id === 'world'){
+    closePanel();
+  }
+});
+
+/* =====================================================================
+   TOMBOL KONTROL
+===================================================================== */
+document.getElementById('btnFit').onclick = fitToScreen;
+document.getElementById('btnZoomIn').onclick = () => { sc = Math.min(2.2, sc * 1.2); apply(); };
+document.getElementById('btnZoomOut').onclick = () => { sc = Math.max(0.05, sc * 0.83); apply(); };
+document.getElementById('btnReset').onclick = fitToScreen;
+
+document.getElementById('btnLabels').onclick = () => {
+  labelsOn = !labelsOn;
+  for(let i = 0; i < edgeEls.length; i++){
+    if(edgeEls[i].lb) edgeEls[i].lb.classList.toggle('showall', labelsOn);
+  }
+};
+
+/* =====================================================================
+   PENCARIAN
+===================================================================== */
+const inp = document.getElementById('search');
+const res = document.getElementById('searchResults');
+
+inp.addEventListener('input', () => {
+  const q = inp.value.toLowerCase().trim();
+  if(!q){ res.style.display = 'none'; return; }
+  const hits = NODES.filter(n =>
+    n.name.toLowerCase().includes(q) || (n.kanji || '').includes(q)
+  ).slice(0, 10);
+
+  res.innerHTML = hits.map(n =>
+    `<div class="sr-item" data-id="${n.id}">${miniImg(n, 30)}<div>${n.name} <small>· ${n.rl}</small></div></div>`
+  ).join('') || '<div class="sr-item">Tidak ditemukan</div>';
+
+  res.style.display = 'block';
+
+  res.querySelectorAll('.sr-item[data-id]').forEach(el => {
+    el.onclick = () => {
+      res.style.display = 'none';
+      inp.value = '';
+      openPanel(el.dataset.id);
+      centerOnNode(el.dataset.id);
+      highlight(el.dataset.id);
+      clearTimeout(window.__hlTimer);
+      window.__hlTimer = setTimeout(() => highlight(null), 1500);
+    };
+  });
+});
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('#search') && !e.target.closest('#searchResults')){
+    res.style.display = 'none';
+  }
+});
+
+/* =====================================================================
+   INIT
+===================================================================== */
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    refreshVpRect();
+    fitToScreen();
+    cull();
+  }, 150);
+});
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    refreshVpRect();
+    fitToScreen();
+    cull();
+    document.getElementById('loader').classList.add('hide');
+    setTimeout(() => document.getElementById('loader').remove(), 400);
+  }, 100);
+});
+</script>
+</body>
+</html>
