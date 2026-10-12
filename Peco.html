@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📸 Album Karakter — Ai · Ruby · Kana · Akane · Memcho</title>
+<style>
+#albumPage {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #121225;
+  z-index: 9999;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 10px 20px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+#albumPage.active { display: flex; }
+
+#albumPage .back-to-diagram {
+  position: fixed; top: 14px; left: 14px; z-index: 10001;
+  background: linear-gradient(135deg, #8e4ec6, #e5484d);
+  color: #fff; border: none; padding: 6px 12px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  box-shadow: 0 3px 10px rgba(229,72,77,.4);
+  transition: transform .2s, box-shadow .2s;
+  font-family: inherit; line-height: 1;
+}
+#albumPage .back-to-diagram:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(229,72,77,.6);
+}
+#albumPage .back-to-diagram .bt-arrow { font-size: 13px; line-height: 1; }
+
+#albumPage * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+#albumPage .char-switcher {
+  position: fixed; top: 14px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 8px; padding: 8px 10px;
+  background: rgba(13,13,20,.94);
+  border: 1px solid #26263a; border-radius: 14px;
+  z-index: 10000;
+  box-shadow: 0 12px 36px rgba(0,0,0,.65), 0 0 0 1px rgba(229,72,77,.08);
+  max-width: 96vw; overflow-x: auto;
+}
+#albumPage .char-switcher::before {
+  content:'SELECT'; position:absolute; top:-8px; left:14px;
+  background:#121225; padding:0 8px;
+  font-size:9px; letter-spacing:2.5px; color:#8b8ba3;
+  font-weight:800; border-radius:4px;
+}
+#albumPage .char-btn {
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  padding:6px 12px 7px; background:#191926;
+  border:1px solid #26263a; border-radius:10px;
+  color:#8b8ba3; cursor:pointer; font-size:10px; font-weight:700;
+  transition:all .2s ease; font-family:inherit;
+  min-width:64px; letter-spacing:.3px; flex-shrink:0;
+}
+#albumPage .char-btn img {
+  width:36px; height:36px; border-radius:50%;
+  object-fit:cover; object-position:top center;
+  border:2px solid transparent; transition:all .25s ease;
+  background:#2a2a3d; display:block;
+}
+#albumPage .char-btn:hover {
+  border-color:#e5484d; color:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 6px 14px rgba(229,72,77,.2);
+}
+#albumPage .char-btn.active {
+  background: linear-gradient(135deg, #8e4ec6 0%, #e5484d 100%);
+  border-color: transparent; color:#fff;
+  box-shadow: 0 6px 22px rgba(229,72,77,.5);
+  transform: translateY(-2px);
+}
+#albumPage .char-btn.active img {
+  border-color:#fff;
+  box-shadow: 0 0 14px rgba(255,255,255,.55);
+}
+
+#albumPage .card-container {
+  --accent:#e5484d; --accent-dark:#a32e35; --accent-light:#d68b8f;
+  --accent-text:#5c1a1e; --accent-muted:#a8787b; --accent-header:#c46a6e;
+  --bg1:#fff0f0; --bg2:#ffe7ea; --bg3:#ffcfd6;
+  --corner-img: none;
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 40%, var(--bg3) 100%);
+  width:700px; height:950px; border-radius:12px;
+  position:relative; padding:35px;
+  display:flex; flex-direction:column; overflow:hidden;
+  box-shadow: 0 15px 40px rgba(0,0,0,.45);
+  transition: background .6s ease, box-shadow .4s ease, transform .4s ease;
+  animation: albumCardIn .85s cubic-bezier(.16,1,.3,1);
+}
+#albumPage .card-container:hover { box-shadow: 0 22px 55px rgba(0,0,0,.55); transform: translateY(-3px); }
+
+@keyframes albumCardIn {
+  from { opacity: 0; transform: translateY(34px) scale(.965); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 720px){
+  #albumPage { padding: 82px 10px 10px; }
+  #albumPage .card-container { zoom: .55; margin: auto; }
+  #albumPage .char-switcher { padding:6px; gap:4px; border-radius:10px; }
+  #albumPage .char-btn { padding:4px 8px 5px; min-width:56px; font-size:9px; }
+  #albumPage .char-btn img { width:26px; height:26px; }
+  #albumPage .back-to-diagram { padding: 6px 9px; font-size: 12px; top: 10px; left: 10px; }
+  #albumPage .back-to-diagram .bt-label { display: none; }
+}
+
+/* ============ DEKORASI ============ */
+#albumPage .pattern-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  z-index: 0; opacity: .22; border-radius: 12px;
+  transition: opacity .5s ease;
+}
+#albumPage .pattern-overlay.v0 {
+  background-image: radial-gradient(circle, var(--accent) 1.2px, transparent 1.4px);
+  background-size: 24px 24px;
+}
+#albumPage .pattern-overlay.v1 {
+  background-image: repeating-linear-gradient(45deg,
+    transparent 0 22px,
+    color-mix(in srgb, var(--accent) 32%, transparent) 22px 23px);
+}
+#albumPage .pattern-overlay.v2 {
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 22px, color-mix(in srgb, var(--accent) 22%, transparent) 22px 23px),
+    repeating-linear-gradient(-45deg, transparent 0 22px, color-mix(in srgb, var(--accent) 22%, transparent) 22px 23px);
+}
+#albumPage .corner-bracket {
+  position: absolute; width: 32px; height: 32px;
+  border: 2px solid var(--accent); opacity: .55; z-index: 2;
+  pointer-events: none;
+  transition: border-color .5s ease, opacity .3s ease;
+}
+#albumPage .corner-bracket.tl { top: 12px; left: 12px; border-right: none; border-bottom: none; border-top-left-radius: 6px; }
+#albumPage .corner-bracket.tr { top: 12px; right: 12px; border-left: none; border-bottom: none; border-top-right-radius: 6px; }
+#albumPage .corner-bracket.bl { bottom: 12px; left: 12px; border-right: none; border-top: none; border-bottom-left-radius: 6px; }
+#albumPage .corner-bracket.br { bottom: 12px; right: 12px; border-left: none; border-top: none; border-bottom-right-radius: 6px; }
+#albumPage .corner-bracket::after {
+  content: ''; position: absolute; width: 6px; height: 6px;
+  background: var(--accent); border-radius: 50%; opacity: .85;
+}
+#albumPage .corner-bracket.tl::after { top: 6px; left: 6px; }
+#albumPage .corner-bracket.tr::after { top: 6px; right: 6px; }
+#albumPage .corner-bracket.bl::after { bottom: 6px; left: 6px; }
+#albumPage .corner-bracket.br::after { bottom: 6px; right: 6px; }
+
+#albumPage .deco-sparkles {
+  position: absolute; inset: 0; pointer-events: none;
+  z-index: 2; overflow: hidden; border-radius: 12px;
+}
+#albumPage .deco-sparkles .sp {
+  position: absolute; line-height: 1;
+  text-shadow: 0 0 5px color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: sparkleFloat 4.5s ease-in-out infinite;
+  transform: translate(-50%, -50%); user-select: none;
+  will-change: opacity;
+}
+@keyframes sparkleFloat {
+  0%,100% { opacity: .28; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  50%     { opacity: .7;  transform: translate(-50%, -55%) rotate(20deg) scale(1.18); }
+}
+
+/* ============================================================
+   🎀 KARAKTER POJOK KANAN BAWAH  (1 warna solid dari PNG)
+   ============================================================ */
+#albumPage .corner-deco {
+  position: absolute;
+  right: -42px;
+  bottom: -64px;
+  width: 306px;
+  height: 430px;
+  z-index: 2;
+  pointer-events: none;
+  animation: cornerRise 1.15s cubic-bezier(.16,1,.3,1) .28s both;
+  will-change: transform, opacity;
+}
+
+#albumPage .corner-halo {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: 340px;
+  height: 340px;
+  margin-left: -170px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--accent) 46%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 18%, transparent) 42%,
+    transparent 70%);
+  filter: blur(16px);
+  opacity: .6;
+  transition: background .6s ease;
+  animation: haloPulse 5.2s ease-in-out infinite;
+}
+
+#albumPage .corner-char {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(168deg,
+    color-mix(in srgb, var(--accent-light) 88%, #ffffff) 0%,
+    var(--accent) 48%,
+    var(--accent-dark) 100%);
+  -webkit-mask-image: var(--corner-img, none);
+  mask-image: var(--corner-img, none);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: bottom center;
+  mask-position: bottom center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  filter: drop-shadow(0 14px 26px color-mix(in srgb, var(--accent) 48%, transparent));
+  transition: background .6s ease, filter .6s ease;
+  animation: cornerFloat 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+#albumPage .corner-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+    transparent 34%,
+    rgba(255,255,255,.92) 50%,
+    transparent 66%);
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  background-position: 200% 0;
+  -webkit-mask-image: var(--corner-img, none);
+  mask-image: var(--corner-img, none);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: bottom center;
+  mask-position: bottom center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: cornerShine 4.8s ease-in-out 1.6s infinite;
+  will-change: background-position, opacity;
+}
+
+#albumPage .corner-spark {
+  position: absolute;
+  left: var(--sx, 20%);
+  top: var(--sy, 30%);
+  font-size: var(--sf, 14px);
+  line-height: 1;
+  opacity: 0;
+  user-select: none;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 72%, transparent));
+  animation: cornerSpark 4.4s ease-in-out infinite;
+  animation-delay: var(--sd, 0s);
+  will-change: transform, opacity;
+}
+
+@keyframes cornerRise {
+  0%   { opacity: 0; transform: translateY(60px) scale(.9) rotate(4deg); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+}
+@keyframes cornerFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35%      { transform: translateY(-13px) rotate(-1.4deg); }
+  70%      { transform: translateY(-5px) rotate(1deg); }
+}
+@keyframes haloPulse {
+  0%, 100% { opacity: .5;  transform: scale(1); }
+  50%      { opacity: .95; transform: scale(1.12); }
+}
+@keyframes cornerShine {
+  0%   { background-position: 200% 0; opacity: 0; }
+  12%  { opacity: .95; }
+  48%  { opacity: .95; }
+  66%  { background-position: -120% 0; opacity: 0; }
+  100% { background-position: -120% 0; opacity: 0; }
+}
+@keyframes cornerSpark {
+  0%, 100% { opacity: 0;   transform: translateY(10px) scale(.65) rotate(0deg); }
+  28%      { opacity: .95; transform: translateY(0)    scale(1.1) rotate(14deg); }
+  58%      { opacity: .45; transform: translateY(-14px) scale(.85) rotate(-10deg); }
+}
+
+#albumPage .quote-line {
+  text-align: center; font-size: 10px; font-style: italic;
+  color: var(--accent-muted); letter-spacing: .3px;
+  margin-top: 4px; z-index: 3; opacity: .85;
+  transition: color .5s ease; cursor: pointer;
+}
+
+#albumPage .bg-huge-text {
+  position:absolute; top:50px; left:50%;
+  transform:translateX(-50%);
+  font-size:155px; font-weight:900;
+  color:var(--accent); letter-spacing:2px;
+  opacity:.18; z-index:1; pointer-events:none;
+  transition: color .5s ease, opacity .5s ease;
+  white-space:nowrap;
+}
+#albumPage .bg-secondary-text {
+  position:absolute; top:310px; left:30px;
+  font-size:70px; font-weight:900;
+  color:var(--accent); opacity:.12;
+  z-index:1; pointer-events:none;
+  transition: color .5s ease;
+}
+#albumPage .bg-char-shadow {
+  position:absolute; bottom:-50px; left:-80px;
+  height:90%; width:auto; object-fit:contain;
+  opacity:.15; z-index:1; pointer-events:none;
+  transition: opacity .5s ease;
+}
+
+#albumPage .header-text {
+  text-align:center; font-size:11px;
+  letter-spacing:4px; color:var(--accent-header);
+  font-weight:700; z-index:3; margin-top:10px;
+  transition: color .5s ease; cursor: pointer;
+}
+#albumPage .content-grid {
+  display:grid; grid-template-columns:1fr 1.1fr 1fr;
+  height:calc(100% - 80px); margin-top:22px;
+  position:relative; z-index:3;
+}
+#albumPage .left-column { display:flex; flex-direction:column; gap:22px; padding-top:130px; }
+#albumPage .right-column { display:flex; flex-direction:column; gap:20px; padding-top:130px; align-items:flex-end; text-align:right; }
+
+#albumPage .badge-title {
+  background-color: var(--accent);
+  color:white; font-size:11px; font-weight:bold;
+  padding:3px 12px; width:fit-content;
+  margin-bottom:14px; letter-spacing:1px;
+  transition: background-color .5s ease;
+}
+#albumPage .right-badge { margin-left:auto; }
+
+#albumPage .info-item {
+  border-left:2px solid var(--accent);
+  padding-left:14px; margin-bottom:14px;
+  display:flex; flex-direction:column;
+  transition: border-color .5s ease;
+}
+#albumPage .suit-item {
+  border-right:2px solid var(--accent);
+  padding-right:14px; margin-bottom:12px;
+  display:flex; flex-direction:column;
+  transition: border-color .5s ease;
+}
+#albumPage .label, #albumPage .suit-label {
+  font-size:10px; color:var(--accent-muted);
+  font-weight:700; letter-spacing:.5px;
+  transition: color .5s ease;
+}
+#albumPage .value, #albumPage .suit-value {
+  font-size:13px; color:var(--accent-text);
+  font-weight:700; margin-top:1px;
+  transition: color .5s ease;
+}
+
+/* ============ EQUALIZER ============ */
+#albumPage .eq-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+#albumPage .eq-header .badge-title { margin-bottom: 0; }
+#albumPage .eq-live {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 8px; font-weight: 800; letter-spacing: 1px;
+  color: var(--accent-muted);
+}
+#albumPage .eq-live .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: eqLive 1.2s ease-in-out infinite;
+}
+@keyframes eqLive {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: .3; transform: scale(.65); }
+}
+#albumPage #eqCanvas {
+  display: block; width: 100%; height: 90px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.02);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  transition: border-color .5s ease, background .3s ease;
+}
+
+#albumPage .stickers-title {
+  font-size:11px; color:var(--accent);
+  font-weight:800; margin-bottom:12px;
+  letter-spacing:.5px;
+  transition: color .5s ease;
+}
+
+#albumPage .sticker-wrapper {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:10px; position:relative;
+}
+#albumPage .sticker-frame {
+  position: relative; overflow: hidden; line-height: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  transition: filter .25s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+#albumPage .sticker-wrapper:hover .sticker-frame {
+  transform: translateY(-4px) rotate(-1.5deg) scale(1.03);
+  filter: brightness(1.1) saturate(1.2);
+}
+#albumPage .sticker-box { width: 88px; height: auto; display: block; }
+#albumPage .sticker-frame::after {
+  content:''; position:absolute;
+  top:0; left:-150%; width:50%; height:100%;
+  background:linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,.75) 50%, rgba(255,255,255,0) 100%);
+  transform:skewX(-25deg);
+  animation: albumShineSweep 2.5s infinite ease-in-out;
+  pointer-events:none;
+}
+@keyframes albumShineSweep { 0%{left:-150%} 50%{left:150%} 100%{left:150%} }
+
+#albumPage .anim-usap {
+  opacity:0;
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  animation: albumWipeCorner .8s cubic-bezier(.25,1,.5,1) forwards;
+}
+#albumPage .st-1 { animation-delay:.1s; }
+#albumPage .st-2 { animation-delay:.25s; }
+#albumPage .st-3 { animation-delay:.4s; }
+@keyframes albumWipeCorner {
+  0% { opacity:0; clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+  100% { opacity:1; clip-path: polygon(0 0, 200% 0, 200% 200%, 0 100%); }
+}
+#albumPage .sticker-num { font-size:11px; color:var(--accent-light); font-weight:bold; }
+
+/* ============ TOOLBAR ============ */
+#albumPage .left-toolbar {
+  margin-top: auto; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+#albumPage .tool-btn {
+  background-color: var(--accent-dark);
+  color:#fff; border: none;
+  width: 38px; height: 38px;
+  display: flex; justify-content: center; align-items: center;
+  border-radius: 6px; cursor: pointer; font-size: 16px;
+  line-height: 1; font-family: inherit;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 30%, transparent);
+  transition: background-color .3s ease, transform .2s ease, box-shadow .2s ease;
+  position: relative; flex-shrink: 0;
+}
+#albumPage .tool-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+#albumPage .tool-btn:active { transform: translateY(0) scale(.94); }
+#albumPage .tool-btn.muted {
+  background-color: #4a4a5a;
+  box-shadow: 0 4px 10px rgba(0,0,0,.3);
+}
+#albumPage .tool-btn .tool-tip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #121225; color: #fff;
+  font-size: 9px; font-weight: 700; letter-spacing: .4px;
+  padding: 3px 7px; border-radius: 4px; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+#albumPage .tool-btn:hover .tool-tip {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+#albumPage .mode-btn {
+  width: auto; padding: 0 11px; gap: 5px;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .6px; min-width: 62px;
+}
+#albumPage .mode-btn .mode-ico { font-size: 11px; line-height: 1; letter-spacing: .5px; }
+#albumPage .mode-btn .mode-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #7dffb0; box-shadow: 0 0 8px #7dffb0;
+  animation: modeDotPulse 1.6s ease-in-out infinite;
+}
+#albumPage .mode-btn.mode-mp3 { background-color: #a32e6d; }
+#albumPage .mode-btn.mode-mp3 .mode-dot {
+  background: #ffd27d; box-shadow: 0 0 8px #ffd27d;
+}
+@keyframes modeDotPulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: .4; transform: scale(.7); }
+}
+#albumPage .auto-badge {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  padding: 7px 10px; border-radius: 6px;
+  font-size: 9px; font-weight: 800; letter-spacing: .6px;
+  color: var(--accent-text);
+  transition: border-color .5s ease; user-select: none;
+}
+#albumPage .auto-badge .auto-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: autoDot 1.2s ease-in-out infinite;
+}
+@keyframes autoDot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: .35; transform: scale(.65); }
+}
+#albumPage .auto-badge .auto-ico { font-size: 12px; line-height: 1; }
+
+#albumPage .counter-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.65);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  padding: 7px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 800; color: var(--accent-text);
+  letter-spacing: .3px;
+  transition: border-color .5s ease, background .3s ease, transform .25s ease;
+  user-select: none; flex-shrink: 0;
+}
+#albumPage .counter-chip.bump { transform: scale(1.12); background: rgba(255,255,255,.95); }
+#albumPage .counter-chip .heart-ico {
+  font-size: 12px;
+  filter: drop-shadow(0 0 4px rgba(255,80,140,.5));
+  animation: heartPulse 1.8s ease-in-out infinite;
+}
+@keyframes heartPulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.12); }
+}
+
+/* ============ CENTER / KARAKTER UTAMA ============ */
+#albumPage .center-column {
+  position:relative; display:flex; justify-content:center;
+  align-items:flex-end; pointer-events: none;
+}
+
+#albumPage .char-aura {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  width: 430px;
+  height: 430px;
+  margin-left: -215px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent) 34%, transparent) 55deg,
+    transparent 135deg,
+    color-mix(in srgb, var(--accent-light) 30%, transparent) 215deg,
+    transparent 295deg,
+    color-mix(in srgb, var(--accent) 26%, transparent) 355deg);
+  filter: blur(20px);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: background .6s ease;
+  animation: auraSpin 15s linear infinite, auraIn 1.2s ease .75s forwards;
+}
+@keyframes auraSpin { to { transform: rotate(360deg); } }
+@keyframes auraIn  { from { opacity: 0; } to { opacity: .78; } }
+
+#albumPage .char-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  animation: charIdleFloat 7s ease-in-out 1.7s infinite;
+  will-change: transform;
+}
+@keyframes charIdleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-11px); }
+}
+
+#albumPage .char-layer {
+  width:165%; max-width:520px;
+  position:absolute; bottom:15px;
+  z-index:10; pointer-events:none; opacity:0;
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+}
+#albumPage .layer-black {
+  filter:brightness(0); z-index:11;
+  animation: albumFastReveal .4s cubic-bezier(.16,1,.3,1) .15s forwards;
+}
+#albumPage .layer-purple {
+  filter:brightness(0) saturate(100%) invert(26%) sepia(85%) saturate(1450%) hue-rotate(250deg) brightness(80%) contrast(90%);
+  z-index:12;
+  animation: albumFastReveal .4s cubic-bezier(.16,1,.3,1) .4s forwards;
+}
+#albumPage .layer-color {
+  z-index:13;
+  animation: albumFastReveal .55s cubic-bezier(.16,1,.3,1) .65s forwards;
+}
+#albumPage .char-hitbox {
+  position: absolute; bottom: 15px;
+  width: 165%; max-width: 520px; height: auto;
+  z-index: 20; opacity: 0; pointer-events: auto;
+  cursor: pointer; display: block;
+  -webkit-mask-image: var(--hit-img, none);
+  mask-image: var(--hit-img, none);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  outline: none; border: none; background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none; user-select: none;
+  -webkit-user-drag: none;
+  animation: none !important; transition: none !important;
+}
+#albumPage .char-hitbox:hover,
+#albumPage .char-hitbox:active,
+#albumPage .char-hitbox:focus {
+  outline: none; border: none; box-shadow: none; background: transparent;
+}
+#albumPage .center-column.pop { animation: charBoing .65s cubic-bezier(.34,1.56,.64,1); }
+
+#albumPage .char-sweep{
+  position:absolute; bottom:15px;
+  width:165%; max-width:520px; height:auto;
+  z-index:14; pointer-events:none; opacity:0;
+  mix-blend-mode:screen;
+  filter:grayscale(1) brightness(2.4)
+         drop-shadow(0 0 5px var(--accent,#fff))
+         drop-shadow(0 0 12px var(--accent,#fff));
+  -webkit-mask-image:
+    linear-gradient(90deg,
+      transparent 0%, transparent 42%, #000 50%,
+      transparent 58%, transparent 100%),
+    var(--sweep-img, none);
+  mask-image:
+    linear-gradient(90deg,
+      transparent 0%, transparent 42%, #000 50%,
+      transparent 58%, transparent 100%),
+    var(--sweep-img, none);
+  -webkit-mask-size: 300% 100%, 100% 100%;
+  mask-size: 300% 100%, 100% 100%;
+  -webkit-mask-repeat: no-repeat, no-repeat;
+  mask-repeat: no-repeat, no-repeat;
+  -webkit-mask-position: 0% 0%, 0% 0%;
+  mask-position: 0% 0%, 0% 0%;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  will-change: mask-position, opacity;
+  animation: albumCharSweep 1.9s cubic-bezier(.45,.05,.25,1) .55s both;
+}
+@keyframes albumCharSweep{
+  0%   { opacity:0; -webkit-mask-position:0% 0%, 0% 0%;   mask-position:0% 0%, 0% 0%; }
+  10%  { opacity:1; }
+  88%  { opacity:1; }
+  100% { opacity:0; -webkit-mask-position:100% 0%, 0% 0%; mask-position:100% 0%, 0% 0%; }
+}
+
+@keyframes albumFadeUp{
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:none; }
+}
+#albumPage .id-badge{animation:albumFadeUp .55s cubic-bezier(.2,.7,.3,1) .15s both}
+#albumPage #infoList .info-item{animation:albumFadeUp .5s cubic-bezier(.2,.7,.3,1) both}
+#albumPage #infoList .info-item:nth-child(1){animation-delay:.20s}
+#albumPage #infoList .info-item:nth-child(2){animation-delay:.30s}
+#albumPage #infoList .info-item:nth-child(3){animation-delay:.40s}
+#albumPage #infoList .info-item:nth-child(4){animation-delay:.50s}
+#albumPage #suitsList .suit-item{animation:albumFadeUp .5s cubic-bezier(.2,.7,.3,1) both}
+#albumPage #suitsList .suit-item:nth-child(1){animation-delay:.30s}
+#albumPage #suitsList .suit-item:nth-child(2){animation-delay:.40s}
+#albumPage #suitsList .suit-item:nth-child(3){animation-delay:.50s}
+#albumPage #vaList .va-tag{animation:albumFadeUp .5s cubic-bezier(.2,.7,.3,1) both}
+#albumPage #vaList .va-tag:nth-child(1){animation-delay:.55s}
+#albumPage #vaList .va-tag:nth-child(2){animation-delay:.65s}
+#albumPage .header-text{animation:albumFadeUp .6s ease both}
+#albumPage .badge-title{animation:albumFadeUp .5s .1s cubic-bezier(.2,.7,.3,1) both}
+
+@keyframes albumFastReveal {
+  0%   { opacity:0; clip-path: polygon(0 0, 0 0, 0 0); }
+  22%  { opacity:1; }
+  100% { opacity:1; clip-path: polygon(0 0, 260% 0, 0 260%); }
+}
+
+#albumPage .footer-text {
+  position:absolute; bottom:20px; left:0; width:100%;
+  display:flex; justify-content:space-between;
+  padding:0 35px; font-size:10px;
+  color:var(--accent-light);
+  font-weight:bold; letter-spacing:1px; z-index:3;
+  transition: color .5s ease;
+}
+
+/* ============ CUTE INTERACTIONS ============ */
+.tap-emoji {
+  position: fixed; pointer-events: none; z-index: 99999;
+  transform: translate(-50%, -50%);
+  animation: tapFloat .95s cubic-bezier(.2,.7,.3,1) forwards;
+  user-select: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
+  will-change: transform, opacity;
+}
+@keyframes tapFloat {
+  0%   { transform: translate(-50%, -50%) scale(.3) rotate(0deg); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.15) rotate(25deg); opacity: 0; }
+}
+.tap-ripple {
+  position: fixed; pointer-events: none; z-index: 99998;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--ripple-color, #fff);
+  transform: translate(-50%, -50%);
+  animation: rippleOut .7s cubic-bezier(.2,.7,.3,1) forwards;
+  opacity: .9;
+}
+@keyframes rippleOut {
+  0%   { width: 20px; height: 20px; opacity: .9; }
+  100% { width: 120px; height: 120px; opacity: 0; }
+}
+
+#albumPage .info-item,
+#albumPage .suit-item,
+#albumPage .va-tag,
+#albumPage .id-badge,
+#albumPage .header-text,
+#albumPage .footer-text,
+#albumPage .sticker-frame,
+#albumPage .bg-huge-text,
+#albumPage .tag-chip,
+#albumPage .quote-line { cursor: pointer; }
+
+#albumPage .info-item,
+#albumPage .suit-item {
+  transition: border-color .5s ease, background .3s ease, box-shadow .3s ease;
+}
+#albumPage .info-item.pop,
+#albumPage .suit-item.pop {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+#albumPage .va-tag {
+  transition: background-color .3s ease, color .3s ease, box-shadow .3s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+#albumPage .va-tag.pop {
+  background-color: var(--accent); color: #fff;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 60%, transparent);
+  transform: scale(1.1);
+}
+#albumPage .id-badge {
+  transition: border-color .5s ease, background .3s ease, box-shadow .3s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+#albumPage .id-badge.pop {
+  border-color: var(--accent);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent),
+              0 10px 28px color-mix(in srgb, var(--accent) 35%, transparent);
+  transform: scale(1.04);
+}
+#albumPage .header-text {
+  transition: color .5s ease, text-shadow .3s ease, letter-spacing .35s ease;
+}
+#albumPage .header-text.pop {
+  color: var(--accent);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+  letter-spacing: 7px;
+}
+#albumPage .footer-text { transition: color .5s ease, text-shadow .3s ease; }
+#albumPage .footer-text.pop {
+  color: var(--accent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+#albumPage .sticker-frame { transition: filter .25s ease; }
+#albumPage .sticker-frame:hover { filter: brightness(1.12) saturate(1.25); }
+#albumPage .sticker-frame.pop { animation: stickerPop .55s cubic-bezier(.34,1.56,.64,1); }
+@keyframes stickerPop {
+  0%,100% { transform: scale(1) rotate(0deg); }
+  35%     { transform: scale(1.18) rotate(-8deg); }
+  65%     { transform: scale(.94) rotate(5deg); }
+}
+#albumPage .bg-huge-text.pop { animation: bigWobble .65s cubic-bezier(.34,1.56,.64,1); }
+@keyframes bigWobble {
+  0%,100% { transform: translateX(-50%) rotate(0deg) scale(1); }
+  30%     { transform: translateX(-50%) rotate(-3deg) scale(1.04); }
+  70%     { transform: translateX(-50%) rotate(3deg) scale(1.04); }
+}
+@keyframes charBoing {
+  0%,100% { transform: translateY(0) scale(1); }
+  30%     { transform: translateY(-12px) scale(1.025); }
+  60%     { transform: translateY(3px) scale(.995); }
+}
+
+#albumPage .tags-list {
+  display: flex; flex-wrap: wrap;
+  gap: 5px; justify-content: flex-end;
+}
+#albumPage .tag-chip {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  color: var(--accent-text);
+  font-size: 9px; font-weight: 800;
+  letter-spacing: .6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .3s ease;
+  user-select: none;
+}
+#albumPage .tag-chip:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+#albumPage .tag-chip.pop {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(1.12);
+}
+</style>
+<style>
+  html,body{margin:0;padding:0;background:#121225;min-height:100vh;}
+  #albumPage{display:flex !important;position:fixed;inset:0;}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div id="albumPage">
+  <button class="back-to-diagram" onclick="showDiagramPage()" title="Kembali ke Diagram">
+    <span class="bt-arrow">←</span><span class="bt-label">Kembali ke Diagram</span>
+  </button>
+
+  <div class="char-switcher" id="charSwitcher"></div>
+
+  <div class="card-container" id="card">
+    <div class="pattern-overlay" id="patternOverlay"></div>
+    <div class="deco-sparkles" id="decoSparkles"></div>
+    <div class="corner-bracket tl"></div>
+    <div class="corner-bracket tr"></div>
+    <div class="corner-bracket bl"></div>
+    <div class="corner-bracket br"></div>
+
+    <!-- 🎀 KARAKTER POJOK KANAN BAWAH (1 warna solid) -->
+    <div class="corner-deco" id="cornerDeco" aria-hidden="true">
+      <div class="corner-halo"></div>
+      <div class="corner-char" id="cornerChar"></div>
+      <div class="corner-shine" id="cornerShine"></div>
+      <span class="corner-spark" style="--sx:6%;  --sy:24%; --sf:13px; --sd:0s">✨</span>
+      <span class="corner-spark" style="--sx:70%; --sy:10%; --sf:16px; --sd:.9s">💫</span>
+      <span class="corner-spark" style="--sx:18%; --sy:62%; --sf:11px; --sd:1.8s">💖</span>
+      <span class="corner-spark" style="--sx:84%; --sy:46%; --sf:14px; --sd:2.6s">⭐</span>
+      <span class="corner-spark" style="--sx:46%; --sy:6%;  --sf:12px; --sd:3.3s">🌸</span>
+    </div>
+
+    <div class="bg-huge-text" id="bigText">AI</div>
+    <div class="bg-secondary-text" id="subText">B-KOMACHI</div>
+    <img src="Ai.png" alt="BG Character" class="bg-char-shadow" id="bgShadow">
+
+    <div class="header-text" id="headerText">OSHI NO KO | B-KOMACHI STAGE</div>
+    <div class="quote-line" id="quoteLine">"Aishiteru" is my weapon.</div>
+
+    <div class="content-grid">
+      <div class="left-column">
+        <div class="info-section">
+          <div class="badge-title">INFO.</div>
+          <div id="infoList"></div>
+        </div>
+
+        <div class="eq-section">
+          <div class="eq-header">
+            <div class="badge-title">EQUALIZER</div>
+            <div class="eq-live"><span class="dot"></span>BGM LIVE</div>
+          </div>
+          <canvas id="eqCanvas" width="500" height="120"></canvas>
+        </div>
+
+        <div class="stickers-section">
+          <div class="stickers-title">▶ STICKERS</div>
+          <div id="stickerList"></div>
+        </div>
+
+        <div class="left-toolbar">
+          <button class="tool-btn" id="soundToggle" aria-label="Toggle Sound">
+            <span class="tool-ico">🔊</span>
+            <span class="tool-tip">MUTE / UNMUTE</span>
+          </button>
+
+          <button class="tool-btn mode-btn" id="modeToggle" aria-label="Toggle Sound Mode">
+            <span class="mode-ico" id="modeIco">JS</span>
+            <span class="mode-dot"></span>
+            <span class="tool-tip">JS SYNTH / MP3</span>
+          </button>
+
+          <div class="auto-badge" id="autoBadge">
+            <span class="auto-ico">🎲</span>
+            <span class="auto-dot"></span>
+            AUTO MIX
+          </div>
+
+          <div class="counter-chip" id="counterChip">
+            <span class="heart-ico">💖</span>
+            <span id="counterVal">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="center-column" id="centerCol">
+        <div class="char-aura" id="charAura"></div>
+        <div class="char-stage" id="charStage">
+          <img src="Ai.png" alt="Black Silhouette" class="char-layer layer-black" id="charBlack">
+          <img src="Ai.png" alt="Purple Silhouette" class="char-layer layer-purple" id="charPurple">
+          <img src="Ai.png" alt="Main Character" class="char-layer layer-color" id="charColor">
+          <img class="char-sweep" id="charSweep" alt="">
+          <img src="Ai.png" alt="" class="char-hitbox" id="charHitbox" aria-hidden="true">
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="id-badge">
+          <div class="id-header">
+            <span class="id-name" id="idName">Ai Hoshino</span>
+            <span class="id-dots">•••</span>
+          </div>
+          <span class="id-sub" id="idSub">ID: B-KOMACHI CENTER</span>
+          <div class="id-bar-code">|||||¡|||||||¡|||||¡||||||||||</div>
+        </div>
+
+        <div class="battlesuits-section">
+          <div class="badge-title right-badge">STAGES</div>
+          <div id="suitsList"></div>
+        </div>
+
+        <div class="voice-actor-section">
+          <span class="va-title">VOICE ACTOR ◀</span>
+          <div id="vaList"></div>
+        </div>
+
+        <div class="tags-section">
+          <div class="badge-title right-badge">TAGS</div>
+          <div id="tagsList" class="tags-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-text">
+      <span>+++ &nbsp;&nbsp; LIES ARE WEAPONS</span>
+      <span>OSHI NO KO &nbsp;&nbsp; +++</span>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+function showDiagramPage(){
+  window.location.href = 'Ror.html';
+}
+
+/* ============================================================
+   📁 FILE MP3
+   ============================================================ */
+var VOICE_FILES = ['voice1.mp3', 'voice2.mp3', 'voice3.mp3'];
+var BGM_FILE    = 'bgm.mp3';
+
+/* ============================================================
+   🌟 KARAKTER
+   ============================================================ */
+var CHARACTERS = {
+  ai: {
+    label: 'Ai', avatar: 'Ai.png',
+    bigText: 'AI', subText: 'B-KOMACHI',
+    header: 'OSHI NO KO | B-KOMACHI STAGE',
+    quote: '"Aishiteru" is my weapon.',
+    image: 'Ai.png',
+    color: {
+      accent: '#e5484d', accentDark: '#a32e35', accentLight: '#d68b8f',
+      accentText: '#5c1a1e', accentMuted: '#a8787b', accentHeader: '#c46a6e',
+      bg1: '#fff0f0', bg2: '#ffe7ea', bg3: '#ffcfd6'
+    },
+    info: [
+      { label:'HEIGHT:',   value:'151cm' },
+      { label:'BIRTHDAY:', value:'November 21' },
+      { label:'ROLE:',     value:'Idol' },
+      { label:'GROUP:',    value:'B-Komachi' }
+    ],
+    tags: ['IDOL','STAR','LIES','CHARM'],
+    stickers: ['Ai.jpg','Ai.jpg','Ai.jpg'],
+    idName: 'Ai Hoshino', idSub: 'ID: B-KOMACHI CENTER',
+    battlesuits: [
+      { label:'STAGE:', value:'Star of B-Komachi' },
+      { label:'SOLO:',  value:'Idol no Uta' },
+      { label:'FINAL:', value:'The Eternal Star' }
+    ],
+    va: [{ label:'JP', value:'RIE TAKAHASHI' }, { label:'EN', value:'——' }]
+  },
+  ruby: {
+    label: 'Ruby', avatar: 'Ruby.png',
+    bigText: 'RUBY', subText: 'B-KOMACHI',
+    header: 'OSHI NO KO | B-KOMACHI STAGE',
+    quote: 'I will become the star!',
+    image: 'Ruby.png',
+    color: {
+      accent: '#f06292', accentDark: '#b03268', accentLight: '#e7a4c0',
+      accentText: '#5c1e39', accentMuted: '#b58999', accentHeader: '#d17ba3',
+      bg1: '#fff0f7', bg2: '#ffe3f0', bg3: '#ffc8de'
+    },
+    info: [
+      { label:'HEIGHT:',   value:'158cm' },
+      { label:'BIRTHDAY:', value:'——' },
+      { label:'ROLE:',     value:'Idol / Actress' },
+      { label:'GROUP:',    value:'B-Komachi' }
+    ],
+    tags: ['RISING','HYPE','PINK','B-KOMACHI'],
+    stickers: ['Ruby.jpg','Ruby.jpg','Ruby.jpg'],
+    idName: 'Ruby Hoshino', idSub: 'ID: B-KOMACHI RISING STAR',
+    battlesuits: [
+      { label:'STAGE:', value:'New B-Komachi' },
+      { label:'SOLO:',  value:'Sign wa B' },
+      { label:'FINAL:', value:'Star of Tomorrow' }
+    ],
+    va: [{ label:'JP', value:'YURIE IGOMA' }, { label:'EN', value:'——' }]
+  },
+  kana: {
+    label: 'Kana', avatar: 'Kana.png',
+    bigText: 'KANA', subText: 'GENIUS',
+    header: 'OSHI NO KO | GENIUS CHILD ACTRESS',
+    quote: 'I am a genius. Obviously.',
+    image: 'Kana.png',
+    color: {
+      accent: '#f0b429', accentDark: '#a87a14', accentLight: '#e8ce8a',
+      accentText: '#5c4413', accentMuted: '#b09872', accentHeader: '#c89e4a',
+      bg1: '#fffaf0', bg2: '#fff3d9', bg3: '#ffe6b0'
+    },
+    info: [
+      { label:'HEIGHT:',   value:'150cm' },
+      { label:'BIRTHDAY:', value:'——' },
+      { label:'ROLE:',     value:'Actress / Idol' },
+      { label:'TROPE:',    value:'Tsundere Prodigy' }
+    ],
+    tags: ['GENIUS','TSUNDERE','STAR','ACTRESS'],
+    stickers: ['Kana.jpg','Kana.jpg','Kana.jpg'],
+    idName: 'Kana Arima', idSub: 'ID: THE GENIUS CHILD',
+    battlesuits: [
+      { label:'STAGE:', value:'Genius Child Actor' },
+      { label:'SOLO:',  value:'Tokyo Blade' },
+      { label:'FINAL:', value:'Real Star' }
+    ],
+    va: [{ label:'JP', value:'MEGUMI HAN' }, { label:'EN', value:'——' }]
+  },
+  akane: {
+    label: 'Akane', avatar: 'Akane.png',
+    bigText: 'AKANE', subText: 'METHOD',
+    header: 'OSHI NO KO | METHOD ACTRESS',
+    quote: 'I become whoever I need to be.',
+    image: 'Akane.png',
+    color: {
+      accent: '#4e7dc4', accentDark: '#2e5aa3', accentLight: '#93a8c2',
+      accentText: '#1e3a5c', accentMuted: '#8a9eb0', accentHeader: '#7b95b5',
+      bg1: '#f0f5ff', bg2: '#e7efff', bg3: '#cfdcff'
+    },
+    info: [
+      { label:'HEIGHT:',   value:'163cm' },
+      { label:'BIRTHDAY:', value:'——' },
+      { label:'ROLE:',     value:'Actress' },
+      { label:'TROPE:',    value:'Method Acting' }
+    ],
+    tags: ['METHOD','ACTING','COPY','LOVENOW'],
+    stickers: ['Akane.jpg','Akane.jpg','Akane.jpg'],
+    idName: 'Akane Kurokawa', idSub: 'ID: THE METHOD ACTRESS',
+    battlesuits: [
+      { label:'STAGE:', value:'Method Actress' },
+      { label:'SOLO:',  value:'LoveNow' },
+      { label:'FINAL:', value:'True Self' }
+    ],
+    va: [{ label:'JP', value:'MANAKA IWAMI' }, { label:'EN', value:'——' }]
+  },
+  memcho: {
+    label: 'Memcho', avatar: 'Memcho.png',
+    bigText: 'MEMCHO', subText: 'YOUTUBER',
+    header: 'OSHI NO KO | STREAMER & IDOL',
+    quote: 'Chat, today is a good stream!',
+    image: 'Memcho.png',
+    color: {
+      accent: '#e87a30', accentDark: '#a04e13', accentLight: '#e8b58a',
+      accentText: '#5c2e13', accentMuted: '#b08972', accentHeader: '#c8894a',
+      bg1: '#fff7f0', bg2: '#ffeede', bg3: '#ffdcbe'
+    },
+    info: [
+      { label:'HEIGHT:',   value:'165cm' },
+      { label:'BIRTHDAY:', value:'——' },
+      { label:'ROLE:',     value:'YouTuber / Idol' },
+      { label:'AGE:',      value:'Hidden Secret' }
+    ],
+    tags: ['STREAM','VIRAL','EDIT','IDOL'],
+    stickers: ['Memcho.jpg','Memcho.jpg','Memcho.jpg'],
+    idName: 'Memcho', idSub: 'ID: VIRAL STREAMER',
+    battlesuits: [
+      { label:'STAGE:', value:'YouTuber' },
+      { label:'SOLO:',  value:'LoveNow Stream' },
+      { label:'FINAL:', value:'Idol Debut' }
+    ],
+    va: [{ label:'JP', value:'——' }, { label:'EN', value:'——' }]
+  }
+};
+
+var ALBUM_DEFAULT_KEY = 'ai';
+var albumCurrentKey = null;
+var clickCount = 0;
+
+/* ============================================================
+   ★ SEEDED RNG
+   ============================================================ */
+function hashStr(s){
+  var h = 2166136261 >>> 0;
+  for (var i = 0; i < s.length; i++){
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function seededRng(seed){
+  var h = hashStr(String(seed));
+  return function(){
+    h += 0x6D2B79F5;
+    var t = h;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function applyCharacterVariants(key){
+  var rng = seededRng('variant:' + key);
+
+  var overlay = document.getElementById('patternOverlay');
+  if (overlay) {
+    overlay.className = 'pattern-overlay v' + Math.floor(rng() * 3);
+    overlay.style.opacity = (0.14 + rng() * 0.14).toFixed(2);
+  }
+
+  var bracketSize = 26 + Math.floor(rng() * 16);
+  var bracketOpacity = 0.35 + rng() * 0.35;
+  var brackets = document.querySelectorAll('#albumPage .corner-bracket');
+  for (var i = 0; i < brackets.length; i++){
+    brackets[i].style.width  = bracketSize + 'px';
+    brackets[i].style.height = bracketSize + 'px';
+    brackets[i].style.opacity = bracketOpacity.toFixed(2);
+  }
+
+  var sparkles = document.getElementById('decoSparkles');
+  if (!sparkles) return;
+  sparkles.innerHTML = '';
+  var emojis = ['✨','⭐','💫','🌟','💖','🎀','🎤','🌸','💕','💝','🩷','🎵'];
+  for (var j = 0; j < 8; j++){
+    var el = document.createElement('div');
+    el.className = 'sp';
+    el.textContent = emojis[Math.floor(rng() * emojis.length)];
+    el.style.left = (4 + rng() * 92) + '%';
+    el.style.top  = (4 + rng() * 92) + '%';
+    el.style.fontSize = (9 + rng() * 14).toFixed(1) + 'px';
+    el.style.animationDelay = (rng() * 4).toFixed(2) + 's';
+    el.style.animationDuration = (3.5 + rng() * 2.5).toFixed(2) + 's';
+    sparkles.appendChild(el);
+  }
+}
+
+/* ============================================================
+   🎵 SOUND ENGINE
+   ============================================================ */
+var audioCtx = null;
+var soundEnabled = true;
+var soundMode = 'js';
+var soundStep = 0;
+var BEEP_VARIANTS = 4;
+
+var sumBus = null, analyser = null, masterGain = null, bgmGain = null, tapGain = null;
+var BGM_NORMAL = 0.45;
+var BGM_DUCKED = 0.08;
+var duckRestoreTimer = null;
+
+var voiceBuffers = [];
+var voiceLoadStarted = false;
+var bgmBuffer = null, bgmSource = null, bgmStarted = false;
+
+function ensureAudio(){
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) { console.warn('[Audio] Web Audio tidak didukung'); return null; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function initAudioGraph(){
+  var ctx = ensureAudio(); if (!ctx) return;
+  if (sumBus) return;
+  try {
+    sumBus = ctx.createGain(); sumBus.gain.value = 1;
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.75;
+    masterGain = ctx.createGain(); masterGain.gain.value = 1;
+    bgmGain = ctx.createGain(); bgmGain.gain.value = BGM_NORMAL;
+    tapGain = ctx.createGain(); tapGain.gain.value = 1;
+    bgmGain.connect(sumBus);
+    tapGain.connect(sumBus);
+    sumBus.connect(analyser);
+    analyser.connect(masterGain);
+    masterGain.connect(ctx.destination);
+  } catch(e) {
+    console.warn('[Audio] gagal init graph', e);
+  }
+}
+function getTapDest(){
+  var ctx = ensureAudio();
+  if (!ctx) return null;
+  return tapGain || ctx.destination;
+}
+
+/* ---------- BGM ---------- */
+function loadBGM(){
+  if (bgmBuffer) return Promise.resolve(true);
+  var ctx = ensureAudio();
+  if (!ctx) return Promise.resolve(false);
+  return fetch(BGM_FILE)
+    .then(function(res){
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.arrayBuffer();
+    })
+    .then(function(arr){ return ctx.decodeAudioData(arr); })
+    .then(function(buffer){
+      bgmBuffer = buffer;
+      console.log('[BGM] siap:', BGM_FILE);
+      return true;
+    })
+    .catch(function(err){
+      console.warn('[BGM] gagal load:', BGM_FILE, err.message || err);
+      return false;
+    });
+}
+function startBGM(){
+  if (bgmStarted) return;
+  var ctx = ensureAudio(); if (!ctx || !bgmBuffer) return;
+  initAudioGraph();
+  try {
+    bgmSource = ctx.createBufferSource();
+    bgmSource.buffer = bgmBuffer;
+    bgmSource.loop = true;
+    bgmSource.connect(bgmGain);
+    bgmSource.start(0);
+    bgmStarted = true;
+    bgmGain.gain.setValueAtTime(BGM_NORMAL, ctx.currentTime);
+    console.log('[BGM] playing');
+  } catch(e) {
+    console.warn('[BGM] gagal start', e);
+  }
+}
+function duckBGM(){
+  if (!audioCtx || !bgmGain || !bgmStarted) return;
+  var now = audioCtx.currentTime;
+  bgmGain.gain.cancelScheduledValues(now);
+  bgmGain.gain.setValueAtTime(bgmGain.gain.value, now);
+  bgmGain.gain.linearRampToValueAtTime(BGM_DUCKED, now + 0.08);
+  clearTimeout(duckRestoreTimer);
+  duckRestoreTimer = setTimeout(function(){
+    if (!bgmGain || !audioCtx) return;
+    var t = audioCtx.currentTime;
+    bgmGain.gain.cancelScheduledValues(t);
+    bgmGain.gain.setValueAtTime(bgmGain.gain.value, t);
+    bgmGain.gain.linearRampToValueAtTime(BGM_NORMAL, t + 0.6);
+  }, 600);
+}
+
+/* ---------- SUARA IMUT ---------- */
+function synthNyaa(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var base = 720 * pitch;
+  var lfo = ctx.createOscillator();
+  var lfoGain = ctx.createGain();
+  lfo.frequency.value = 16; lfoGain.gain.value = 45; lfo.connect(lfoGain);
+  var osc = ctx.createOscillator();
+  var filter = ctx.createBiquadFilter();
+  var gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  filter.type = 'lowpass'; filter.frequency.value = 2200; filter.Q.value = 7;
+  osc.frequency.setValueAtTime(base, now);
+  osc.frequency.exponentialRampToValueAtTime(base * 1.6, now + 0.08);
+  osc.frequency.exponentialRampToValueAtTime(base * 0.72, now + 0.36);
+  lfoGain.connect(osc.frequency);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.18, now + 0.03);
+  gain.gain.setValueAtTime(0.18, now + 0.10);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.44);
+  osc.connect(filter); filter.connect(gain); gain.connect(dest);
+  osc.start(now); osc.stop(now + 0.46);
+  lfo.start(now); lfo.stop(now + 0.46);
+}
+function synthPop(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var base = 900 * pitch;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(base, now);
+  osc.frequency.exponentialRampToValueAtTime(base * 0.35, now + 0.09);
+  gain.gain.setValueAtTime(0.22, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+  osc.connect(gain); gain.connect(dest);
+  osc.start(now); osc.stop(now + 0.14);
+}
+function synthSparkle(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var notes = [2400, 3000, 3600, 4200];
+  for (var i = 0; i < notes.length; i++){
+    var t = now + i * 0.045;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[i] * pitch, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(0.08, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    osc.connect(gain); gain.connect(dest);
+    osc.start(t); osc.stop(t + 0.16);
+  }
+}
+function synthCoin(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var seq = [{f:988*pitch,t:0,d:0.08},{f:1319*pitch,t:0.07,d:0.30}];
+  for (var i = 0; i < seq.length; i++){
+    var n = seq[i];
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(n.f, now + n.t);
+    gain.gain.setValueAtTime(0.0001, now + n.t);
+    gain.gain.linearRampToValueAtTime(0.09, now + n.t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+    osc.connect(gain); gain.connect(dest);
+    osc.start(now + n.t); osc.stop(now + n.t + n.d + 0.02);
+  }
+}
+function synthChirp(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1800 * pitch, now);
+  osc.frequency.exponentialRampToValueAtTime(3600 * pitch, now + 0.06);
+  osc.frequency.exponentialRampToValueAtTime(2200 * pitch, now + 0.14);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.13, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.17);
+  osc.connect(gain); gain.connect(dest);
+  osc.start(now); osc.stop(now + 0.19);
+}
+function synthBoing(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(320 * pitch, now);
+  osc.frequency.exponentialRampToValueAtTime(880 * pitch, now + 0.05);
+  osc.frequency.exponentialRampToValueAtTime(420 * pitch, now + 0.22);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.16, now + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+  osc.connect(gain); gain.connect(dest);
+  osc.start(now); osc.stop(now + 0.30);
+}
+function synthHeart(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(660 * pitch, now);
+  osc.frequency.linearRampToValueAtTime(990 * pitch, now + 0.13);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.15, now + 0.04);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+  osc.connect(gain); gain.connect(dest);
+  osc.start(now); osc.stop(now + 0.34);
+}
+function synthGiggle(pitch){
+  pitch = pitch || 1;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var pulses = [0, 0.085, 0.17, 0.255];
+  for (var i = 0; i < pulses.length; i++){
+    var t = pulses[i];
+    var f = (1200 - i * 110) * pitch;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(f, now + t);
+    osc.frequency.exponentialRampToValueAtTime(f * 1.22, now + t + 0.05);
+    gain.gain.setValueAtTime(0.0001, now + t);
+    gain.gain.linearRampToValueAtTime(0.10, now + t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.075);
+    osc.connect(gain); gain.connect(dest);
+    osc.start(now + t); osc.stop(now + t + 0.09);
+  }
+}
+
+var CUTE_SOUNDS = [
+  synthNyaa, synthPop, synthSparkle, synthCoin,
+  synthChirp, synthBoing, synthHeart, synthGiggle
+];
+
+function playBeep(pitchMul, variant){
+  pitchMul = pitchMul || 1; variant = variant || 0;
+  if (!soundEnabled) return;
+  var ctx = ensureAudio(); if (!ctx) return;
+  var dest = getTapDest(); if (!dest) return;
+  var now = ctx.currentTime;
+  var baseFreqs = [780, 880, 660, 990];
+  var baseFreq = baseFreqs[variant % baseFreqs.length] * pitchMul;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(baseFreq, now);
+  osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.75, now + 0.045);
+  osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.82, now + 0.18);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.16, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+  osc.connect(gain); gain.connect(dest);
+  osc.start(now); osc.stop(now + 0.24);
+}
+
+function preloadVoices(){
+  if (voiceLoadStarted) return Promise.resolve();
+  voiceLoadStarted = true;
+  var ctx = ensureAudio();
+  if (!ctx) return Promise.resolve();
+
+  var promises = VOICE_FILES.map(function(src){
+    return fetch(src)
+      .then(function(res){
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.arrayBuffer();
+      })
+      .then(function(arr){ return ctx.decodeAudioData(arr); })
+      .then(function(buffer){ return { src: src, buffer: buffer }; })
+      .catch(function(err){
+        console.warn('[Voice] gagal load:', src, err.message || err);
+        return null;
+      });
+  });
+
+  return Promise.all(promises).then(function(results){
+    for (var i = 0; i < results.length; i++){
+      if (results[i]) voiceBuffers.push(results[i]);
+    }
+    console.log('[Voice] siap:', voiceBuffers.length, 'file');
+  });
+}
+
+function playVoiceBuffer(idx, pitchMul){
+  pitchMul = pitchMul || 1;
+  if (!soundEnabled) return false;
+  if (!voiceBuffers.length) return false;
+  var ctx = ensureAudio(); if (!ctx) return false;
+  var dest = getTapDest(); if (!dest) return false;
+  var picked = voiceBuffers[idx % voiceBuffers.length];
+  var srcNode = ctx.createBufferSource();
+  srcNode.buffer = picked.buffer;
+  srcNode.playbackRate.value = Math.min(pitchMul, 1.25);
+  var gain = ctx.createGain();
+  gain.gain.value = 0.85;
+  srcNode.connect(gain); gain.connect(dest);
+  srcNode.start(0);
+  return true;
+}
+
+function playToggle(on){
+  var ctx = ensureAudio(); if (!ctx) return;
+  var now = ctx.currentTime;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'sine';
+  var startF = on ? 440 : 620;
+  var endF   = on ? 880 : 320;
+  osc.frequency.setValueAtTime(startF, now);
+  osc.frequency.exponentialRampToValueAtTime(endF, now + 0.12);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.12, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(now); osc.stop(now + 0.2);
+}
+
+var lastCharClickTime = 0;
+var spamLevel = 0;
+var SPAM_WINDOW = 400;
+function getSpamPitch(){
+  var now = performance.now();
+  if (now - lastCharClickTime < SPAM_WINDOW) {
+    spamLevel = Math.min(spamLevel + 1, 5);
+  } else { spamLevel = 0; }
+  lastCharClickTime = now;
+  return 1 + spamLevel * 0.05;
+}
+
+function playNextSound(){
+  if (!soundEnabled) return;
+  var pitch = getSpamPitch();
+  if (soundMode === 'js') {
+    var fn = CUTE_SOUNDS[soundStep % CUTE_SOUNDS.length];
+    if (typeof fn === 'function') fn(pitch);
+    soundStep++;
+  } else {
+    if (voiceBuffers.length > 0) {
+      var idx = soundStep % voiceBuffers.length;
+      if (!playVoiceBuffer(idx, pitch)) playBeep(pitch, soundStep % BEEP_VARIANTS);
+    } else {
+      playBeep(pitch, soundStep % BEEP_VARIANTS);
+    }
+    soundStep++;
+  }
+  duckBGM();
+}
+
+/* ---------- TOGGLES ---------- */
+function setupSoundToggle(){
+  var btn = document.getElementById('soundToggle');
+  if (!btn) return;
+  var ico = btn.querySelector('.tool-ico');
+  var tip = btn.querySelector('.tool-tip');
+
+  function applyState(){
+    if (ico) ico.textContent = soundEnabled ? '🔊' : '🔇';
+    btn.classList.toggle('muted', !soundEnabled);
+    if (tip) tip.textContent = soundEnabled ? 'SOUND ON' : 'SOUND OFF';
+    if (masterGain && audioCtx) {
+      var t = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(t);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, t);
+      masterGain.gain.linearRampToValueAtTime(soundEnabled ? 1 : 0, t + 0.15);
+    }
+  }
+  applyState();
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    soundEnabled = !soundEnabled;
+    playToggle(soundEnabled);
+    applyState();
+  });
+}
+
+function setupModeToggle(){
+  var btn = document.getElementById('modeToggle');
+  if (!btn) return;
+  var ico = document.getElementById('modeIco');
+  var tip = btn.querySelector('.tool-tip');
+
+  function applyState(){
+    var isMp3 = soundMode === 'mp3';
+    if (ico) ico.textContent = isMp3 ? 'MP3' : 'JS';
+    btn.classList.toggle('mode-mp3', isMp3);
+    if (tip) tip.textContent = isMp3 ? 'MODE: MP3 (klik → JS)' : 'MODE: JS SYNTH (klik → MP3)';
+  }
+  applyState();
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    soundMode = (soundMode === 'js') ? 'mp3' : 'js';
+    soundStep = 0;
+    playToggle(true);
+    applyState();
+    if (soundMode === 'mp3') preloadVoices();
+  });
+}
+
+/* ============================================================
+   📊 EQUALIZER
+   ============================================================ */
+var EQ_NUM_BARS = 24;
+var eqBarHeights = new Float32Array(EQ_NUM_BARS);
+var eqAccent = '#e5484d';
+var eqAccentDark = '#a32e35';
+var eqIdleT = 0;
+var eqDataArr = null;
+var eqCanvasW = 0, eqCanvasH = 0;
+var eqGrad = null;
+var eqGradKey = '';
+var eqLastFrame = 0;
+var EQ_FRAME_MS = 1000 / 30;
+var eqStarted = false;
+
+function updateEqAccent(){
+  var card = document.getElementById('card');
+  if (!card) return;
+  var cs = getComputedStyle(card);
+  eqAccent = cs.getPropertyValue('--accent').trim() || '#e5484d';
+  eqAccentDark = cs.getPropertyValue('--accent-dark').trim() || '#a32e35';
+  eqGradKey = '';
+  eqGrad = null;
+}
+
+function drawEQFrame(ts){
+  if (!eqStarted) return;
+  requestAnimationFrame(drawEQFrame);
+
+  if (!ts) ts = performance.now();
+  if (ts - eqLastFrame < EQ_FRAME_MS) return;
+  eqLastFrame = ts;
+
+  var canvas = document.getElementById('eqCanvas');
+  if (!canvas) return;
+  var ctx2d = canvas.getContext('2d');
+  if (!ctx2d) return;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  var cw = canvas.clientWidth || 300;
+  var ch = canvas.clientHeight || 90;
+  var targetW = Math.round(cw * dpr);
+  var targetH = Math.round(ch * dpr);
+  if (eqCanvasW !== targetW || eqCanvasH !== targetH) {
+    canvas.width = targetW;
+    canvas.height = targetH;
+    eqCanvasW = targetW;
+    eqCanvasH = targetH;
+    eqGradKey = '';
+    eqGrad = null;
+  }
+  var CW = eqCanvasW;
+  var CH = eqCanvasH;
+  if (CW === 0 || CH === 0) return;
+
+  ctx2d.clearRect(0, 0, CW, CH);
+
+  var hasData = false;
+  if (analyser) {
+    if (!eqDataArr || eqDataArr.length !== analyser.frequencyBinCount) {
+      eqDataArr = new Uint8Array(analyser.frequencyBinCount);
+    }
+    analyser.getByteFrequencyData(eqDataArr);
+    var sum = 0;
+    for (var k = 0; k < eqDataArr.length; k += 4) sum += eqDataArr[k];
+    if (sum > 0) hasData = true;
+  }
+
+  var barW = CW / EQ_NUM_BARS;
+  var pad = 1.5 * dpr;
+  var barDrawW = barW - pad * 2;
+  var radius = Math.min(3 * dpr, barDrawW / 2);
+
+  var gKey = eqAccent + '|' + eqAccentDark + '|' + CH;
+  if (eqGradKey !== gKey || !eqGrad) {
+    eqGrad = ctx2d.createLinearGradient(0, 0, 0, CH);
+    eqGrad.addColorStop(0, eqAccent);
+    eqGrad.addColorStop(1, eqAccentDark);
+    eqGradKey = gKey;
+  }
+  ctx2d.fillStyle = eqGrad;
+
+  var maxBin = hasData ? Math.floor(eqDataArr.length * 0.8) : 1;
+  var minBin = 1;
+
+  for (var i = 0; i < EQ_NUM_BARS; i++) {
+    var target = 0;
+    if (hasData) {
+      var t0 = i / EQ_NUM_BARS;
+      var t1 = (i + 1) / EQ_NUM_BARS;
+      var b0 = Math.floor(minBin * Math.pow(maxBin / minBin, t0));
+      var b1 = Math.max(b0 + 1, Math.floor(minBin * Math.pow(maxBin / minBin, t1)));
+      var s = 0, n = 0;
+      var lim = Math.min(b1, eqDataArr.length);
+      for (var b = b0; b < lim; b++) { s += eqDataArr[b]; n++; }
+      target = n > 0 ? (s / n) / 255 : 0;
+    } else {
+      eqIdleT += 0.03;
+      target = 0.12 + 0.10 * (Math.sin(eqIdleT + i * 0.35) * 0.5 + 0.5);
+    }
+
+    var cur = eqBarHeights[i];
+    eqBarHeights[i] = cur + (target - cur) * (target > cur ? 0.55 : 0.14);
+
+    var barH = Math.max(3 * dpr, eqBarHeights[i] * (CH - 8 * dpr));
+    var x = i * barW + pad;
+    var y = CH - barH;
+
+    if (typeof ctx2d.roundRect === 'function') {
+      ctx2d.beginPath();
+      ctx2d.roundRect(x, y, barDrawW, barH, radius);
+      ctx2d.fill();
+    } else {
+      ctx2d.fillRect(x, y, barDrawW, barH);
+    }
+  }
+}
+
+function startEQLoop(){
+  if (eqStarted) return;
+  eqStarted = true;
+  requestAnimationFrame(drawEQFrame);
+}
+
+/* ============================================================
+   BUILD UI
+   ============================================================ */
+function buildAlbumSwitcher(){
+  var sw = document.getElementById('charSwitcher');
+  if (!sw) return;
+  var keys = Object.keys(CHARACTERS);
+  var html = '';
+  for (var i = 0; i < keys.length; i++){
+    var key = keys[i];
+    var c = CHARACTERS[key];
+    html += '<button class="char-btn" data-char="' + key + '">' +
+      '<img src="' + c.avatar + '" alt="' + c.label + '" ' +
+      'onerror="this.style.background=\'linear-gradient(135deg,#8e4ec6,#e5484d)\';this.removeAttribute(\'src\')">' +
+      '<span>' + c.label + '</span></button>';
+  }
+  sw.innerHTML = html;
+  var btns = sw.querySelectorAll('.char-btn');
+  for (var j = 0; j < btns.length; j++){
+    (function(btn){
+      btn.addEventListener('click', function(){
+        var key = btn.dataset.char;
+        if (key === albumCurrentKey) return;
+        history.replaceState(null, '', '?char=' + key);
+        loadAlbumCharacter(key, true);
+        clickCount = 0;
+        updateCounter();
+        playToggle(true);
+      });
+    })(btns[j]);
+  }
+}
+function buildInfo(list){
+  var h = '';
+  for (var i = 0; i < list.length; i++){
+    h += '<div class="info-item"><span class="label">' + list[i].label + '</span><span class="value">' + list[i].value + '</span></div>';
+  }
+  return h;
+}
+function buildStickers(arr){
+  var h = '';
+  for (var i = 0; i < arr.length; i++){
+    h += '<div class="sticker-wrapper anim-usap st-' + (i+1) + '">' +
+      '<div class="sticker-frame"><img src="' + arr[i] + '" alt="Sticker ' + (i+1) + '" class="sticker-box"></div>' +
+      '<span class="sticker-num">0' + (i+1) + '</span></div>';
+  }
+  return h;
+}
+function buildSuits(list){
+  var h = '';
+  for (var i = 0; i < list.length; i++){
+    h += '<div class="suit-item"><span class="suit-label">' + list[i].label + '</span><span class="suit-value">' + list[i].value + '</span></div>';
+  }
+  return h;
+}
+function buildVA(list){
+  var h = '';
+  for (var i = 0; i < list.length; i++){
+    h += '<div class="va-tag">' + list[i].label + ' : ' + list[i].value + '</div>';
+  }
+  return h;
+}
+function buildTags(list){
+  var h = '';
+  for (var i = 0; i < list.length; i++){
+    h += '<div class="tag-chip">' + list[i] + '</div>';
+  }
+  return h;
+}
+
+function loadAlbumCharacter(key, animate){
+  var c = CHARACTERS[key];
+  if (!c) return;
+  albumCurrentKey = key;
+
+  var btns = document.querySelectorAll('#albumPage .char-btn');
+  for (var i = 0; i < btns.length; i++){
+    if (btns[i].dataset.char === key) btns[i].classList.add('active');
+    else btns[i].classList.remove('active');
+  }
+
+  var card = document.getElementById('card');
+  if (card) {
+    var colorKeys = Object.keys(c.color);
+    for (var j = 0; j < colorKeys.length; j++){
+      var k = colorKeys[j];
+      var cssVar = '--' + k.replace(/[A-Z]/g, function(m){ return '-' + m.toLowerCase(); });
+      card.style.setProperty(cssVar, c.color[k]);
+    }
+    /* 🎀 karakter pojok → satu warna solid dari PNG */
+    card.style.setProperty('--corner-img', 'url("' + c.image + '")');
+    card.style.setProperty('--hit-img', 'url("' + c.image + '")');
+    card.style.setProperty('--sweep-img', 'url("' + c.image + '")');
+  }
+
+  var setText = function(id, val){
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  setText('bigText', c.bigText);
+  setText('subText', c.subText);
+  setText('headerText', c.header);
+  setText('quoteLine', c.quote);
+  setText('idName', c.idName);
+  setText('idSub', c.idSub);
+
+  var imgIds = ['bgShadow','charBlack','charPurple','charColor','charSweep','charHitbox'];
+  for (var m = 0; m < imgIds.length; m++){
+    var img = document.getElementById(imgIds[m]);
+    if (img) img.src = c.image;
+  }
+
+  var hitbox = document.getElementById('charHitbox');
+  if (hitbox) {
+    hitbox.style.webkitMaskImage = 'url("' + c.image + '")';
+    hitbox.style.maskImage = 'url("' + c.image + '")';
+  }
+
+  var setHTML = function(id, html){
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  };
+  setHTML('infoList', buildInfo(c.info));
+  setHTML('stickerList', buildStickers(c.stickers));
+  setHTML('suitsList', buildSuits(c.battlesuits));
+  setHTML('vaList', buildVA(c.va));
+  setHTML('tagsList', buildTags(c.tags));
+
+  applyCharacterVariants(key);
+  updateEqAccent();
+
+  if (animate) replayAlbumAnimations();
+}
+
+/* restart semua animasi masuk (termasuk karakter pojok + aura) */
+function replayAlbumAnimations(){
+  var restart = function(el){
+    if (!el) return;
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  };
+
+  restart(document.getElementById('charBlack'));
+  restart(document.getElementById('charPurple'));
+  restart(document.getElementById('charColor'));
+  restart(document.getElementById('charSweep'));
+  restart(document.getElementById('cornerDeco'));
+  restart(document.getElementById('cornerChar'));
+  restart(document.getElementById('cornerShine'));
+  restart(document.getElementById('charAura'));
+
+  var halo = document.querySelector('#albumPage .corner-halo');
+  restart(halo);
+
+  var stickers = document.querySelectorAll('#albumPage .sticker-wrapper');
+  for (var j = 0; j < stickers.length; j++) restart(stickers[j]);
+
+  var bt = document.getElementById('bigText');
+  if (bt) {
+    bt.style.transition = 'none';
+    bt.style.opacity = '0';
+    void bt.offsetWidth;
+    bt.style.transition = 'opacity .6s ease';
+    bt.style.opacity = '.18';
+  }
+}
+
+var TAP_EMOJIS = ['💖','✨','⭐','💫','🌸','💕','💗','🎀','🩷','💝','🐾','🐱','🌟','🎤'];
+function spawnTap(x, y, big){
+  var n = big ? 6 : 4;
+  for (var i = 0; i < n; i++){
+    var el = document.createElement('div');
+    el.className = 'tap-emoji';
+    el.textContent = TAP_EMOJIS[Math.floor(Math.random() * TAP_EMOJIS.length)];
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    el.style.setProperty('--dx', ((Math.random() - 0.5) * 130) + 'px');
+    el.style.setProperty('--dy', (-40 - Math.random() * 90) + 'px');
+    el.style.fontSize = (big ? 16 : 12) + Math.random() * 9 + 'px';
+    el.style.animationDelay = (i * 0.035) + 's';
+    document.body.appendChild(el);
+    (function(node){ setTimeout(function(){ if (node.parentNode) node.parentNode.removeChild(node); }, 1100); })(el);
+  }
+}
+function spawnRipple(x, y, color){
+  var el = document.createElement('div');
+  el.className = 'tap-ripple';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.setProperty('--ripple-color', color || '#fff');
+  document.body.appendChild(el);
+  setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 720);
+}
+function popClass(el, cls, dur){
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+  clearTimeout(el._popTimer);
+  el._popTimer = setTimeout(function(){ el.classList.remove(cls); }, dur);
+}
+function updateCounter(bump){
+  var chip = document.getElementById('counterChip');
+  var valEl = document.getElementById('counterVal');
+  if (valEl) valEl.textContent = clickCount;
+  if (bump && chip) {
+    chip.classList.remove('bump');
+    void chip.offsetWidth;
+    chip.classList.add('bump');
+    clearTimeout(chip._bumpTimer);
+    chip._bumpTimer = setTimeout(function(){ chip.classList.remove('bump'); }, 200);
+  }
+}
+
+var albumRoot = document.getElementById('albumPage');
+if (albumRoot) {
+  albumRoot.addEventListener('click', function(e){
+    var t = e.target;
+    function hit(sel){ return t.closest(sel); }
+
+    if (hit('.char-hitbox')) {
+      playNextSound();
+      clickCount++;
+      updateCounter(true);
+      var card = document.getElementById('card');
+      var color = (card ? getComputedStyle(card).getPropertyValue('--accent').trim() : '') || '#fff';
+      spawnRipple(e.clientX, e.clientY, color);
+      spawnTap(e.clientX, e.clientY, true);
+      popClass(document.getElementById('centerCol'), 'pop', 700);
+      return;
+    }
+
+    function softSound(){
+      if (!soundEnabled) return;
+      if (soundMode === 'js') synthPop(0.95);
+      else playBeep(0.9, 1);
+      duckBGM();
+    }
+
+    spawnTap(e.clientX, e.clientY);
+
+    var h;
+    if ((h = hit('.tag-chip')))      { popClass(h, 'pop', 560); softSound(); return; }
+    if ((h = hit('.sticker-frame'))) { popClass(h, 'pop', 620); softSound(); return; }
+    if ((h = hit('.bg-huge-text')))  { popClass(h, 'pop', 700); softSound(); return; }
+    if ((h = hit('.info-item')))     { popClass(h, 'pop', 560); softSound(); return; }
+    if ((h = hit('.suit-item')))     { popClass(h, 'pop', 560); softSound(); return; }
+    if ((h = hit('.va-tag')))        { popClass(h, 'pop', 560); softSound(); return; }
+    if ((h = hit('.id-badge')))      { popClass(h, 'pop', 680); softSound(); return; }
+    if ((h = hit('.header-text')))   { popClass(h, 'pop', 620); softSound(); return; }
+    if ((h = hit('.footer-text')))   { popClass(h, 'pop', 620); softSound(); return; }
+    if ((h = hit('.quote-line')))    { popClass(h, 'pop', 620); softSound(); return; }
+  }, { passive: true });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function initAlbumPage(){
+  buildAlbumSwitcher();
+  setupSoundToggle();
+  setupModeToggle();
+  updateCounter(false);
+  startEQLoop();
+
+  var params = new URLSearchParams(window.location.search);
+  var requested = params.get('char');
+  var key = (requested && CHARACTERS[requested]) ? requested : ALBUM_DEFAULT_KEY;
+  loadAlbumCharacter(key, true);
+
+  var unlock = function(){
+    ensureAudio();
+    initAudioGraph();
+    Promise.all([loadBGM(), preloadVoices()]).then(function(results){
+      if (results[0]) startBGM();
+    });
+    document.removeEventListener('click', unlock);
+    document.removeEventListener('touchstart', unlock);
+    document.removeEventListener('keydown', unlock);
+  };
+  document.addEventListener('click', unlock, { once: true });
+  document.addEventListener('touchstart', unlock, { once: true });
+  document.addEventListener('keydown', unlock, { once: true });
+}
+window.addEventListener('load', function(){ setTimeout(initAlbumPage, 100); });
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') showDiagramPage();
+});
+</script>
+</body>
+</html>
